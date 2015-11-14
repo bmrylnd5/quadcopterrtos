@@ -1,7 +1,10 @@
+extern "C" 
+{
 #include <Servo.h>
 
 #include "motors.h"
 #include "pid.h"
+}
 
 /* commands */
 static float arm         = 0.0;
@@ -16,7 +19,7 @@ static float rollDeg  = 0.0;
 static float yawDeg   = 0.0;
 
 /* Motor classes */
-Servo motors[MOTORS_NUM];
+static Servo motors[MOTORS_NUM];
 
 void setup()
 {
