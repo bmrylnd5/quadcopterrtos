@@ -25,7 +25,7 @@ float pidPitch(float cmd,
   derivative = (error - errorDerivative)/dt;
 
   /* calculate output */
-  output = PITCH_KP * error + PITCH_KI * errorInt + PITCH_KD * derivative;
+  output = PITCH_KP * error + PITCH_KI * errorInt - PITCH_KD * derivative;
 
   /* clamp the output */
   if (output > PITCH_UPPER_LIMIT)
@@ -74,7 +74,7 @@ float pidRoll(float cmd,
   derivative = (error - errorDerivative)/dt;
 
   /* calculate output */
-  output = ROLL_KP * error + ROLL_KI * errorInt + ROLL_KD * derivative;
+  output = ROLL_KP * error + ROLL_KI * errorInt - ROLL_KD * derivative;
 
   /* clamp the output */
   if (output > ROLL_UPPER_LIMIT)
@@ -110,7 +110,7 @@ float pidYaw(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = cmd - actual;
+  error = mod((cmd - actual) + M_PI, 2 * M_PI) - M_PI;
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
@@ -123,7 +123,7 @@ float pidYaw(float cmd,
   derivative = (error - errorDerivative)/dt;
 
   /* calculate output */
-  output = YAW_KP * error + YAW_KI * errorInt + YAW_KD * derivative;
+  output = YAW_KP * error + YAW_KI * errorInt - YAW_KD * derivative;
 
   /* clamp the output */
   if (output > YAW_UPPER_LIMIT)
