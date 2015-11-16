@@ -110,7 +110,7 @@ float pidYaw(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = mod((cmd - actual) + M_PI, 2 * M_PI) - M_PI;
+  error = fmod((cmd - actual) + M_PI, 2 * M_PI) - M_PI;
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
