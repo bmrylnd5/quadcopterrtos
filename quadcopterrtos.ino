@@ -15,6 +15,9 @@ static float pitchCmd    = 0.0;
 static float rollCmd     = 0.0;
 static float yawCmd      = 0.0;
 static float throttleCmd = 0.0;
+static float newPitchCmd = 0.0;
+static float newRollCmd  = 0.0;
+static float newYawCmd   = 0.0;
 
 /* IMU readings */
 static float pitchDeg = 0.0;
@@ -23,7 +26,6 @@ static float yawDeg   = 0.0;
 
 /* Motor classes */
 static Servo motors[MOTORS_NUM];
-
 
 /*
 * And this is the IMU stuff that I would put in its own class... IF ARDUINO WOULD LET ME COMPILE ONE"
@@ -176,14 +178,14 @@ void loop()
 	Serial.print(",");
   
     /* adjust command using PID - in degrees */
-    pitchCmd = pidPitch(pitchCmd, pitchDeg);
-    rollCmd  = pidRoll(rollCmd,   rollDeg);
-    yawCmd   = pidYaw(yawCmd,     yawDeg);
-	Serial.print(pitchCmd);
+    newPitchCmd = pidPitch(pitchCmd, pitchDeg);
+    newRollCmd  = pidRoll(rollCmd,   rollDeg);
+    newYawCmd   = pidYaw(yawCmd,     yawDeg);
+	Serial.print(newPitchCmd);
 	Serial.print(",");
-	Serial.print(rollCmd);
+	Serial.print(newRollCmd);
 	Serial.print(",");
-	Serial.println(yawCmd);
+	Serial.println(newYawCmd);
   
     /* convert degrees to PWM (us) */
     

@@ -4,6 +4,7 @@
 #define epsilon 0.01 /* error limit */
 #define dt      0.01 /* sampling time in seconds */
 
+/* UNITS ARE IN RADIANS */
 /* gains - TUNE ME */
 #define PITCH_KP           0.2
 #define PITCH_KI           0.043
@@ -23,6 +24,8 @@
 #define YAW_UPPER_LIMIT    0.1
 #define YAW_LOWER_LIMIT   -0.1
 
+#define DEG2RAD(DEG) ((DEG) * (float)((M_PI)/(180.0)))
+#define RAD2DEG(RAD) ((RAD) * (float)(180.0/M_PI))
 /**
  * Outputs the new adjusted pitch command based on current
  * command and IMU reading.

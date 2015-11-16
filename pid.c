@@ -12,7 +12,7 @@ float pidPitch(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = cmd - actual;
+  error = DEG2RAD(cmd) - DEG2RAD(actual);
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
@@ -22,7 +22,7 @@ float pidPitch(float cmd,
   }
 
   /* derivative */
-  derivative = (error - errorDerivative)/dt;
+  derivative = ((float)(error - errorDerivative))/dt;
 
   /* calculate output */
   output = PITCH_KP * error + PITCH_KI * errorInt - PITCH_KD * derivative;
@@ -48,7 +48,7 @@ float pidPitch(float cmd,
   }
 
   errorDerivative = error;
-  return output;
+  return RAD2DEG(output);
 }
 
 float pidRoll(float cmd, 
@@ -61,7 +61,7 @@ float pidRoll(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = cmd - actual;
+  error = DEG2RAD(cmd) - DEG2RAD(actual);
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
@@ -71,7 +71,7 @@ float pidRoll(float cmd,
   }
 
   /* derivative */
-  derivative = (error - errorDerivative)/dt;
+  derivative = ((float)(error - errorDerivative))/dt;
 
   /* calculate output */
   output = ROLL_KP * error + ROLL_KI * errorInt - ROLL_KD * derivative;
@@ -97,7 +97,7 @@ float pidRoll(float cmd,
   }
 
   errorDerivative = error;
-  return output;
+  return RAD2DEG(output);
 }
 
 float pidYaw(float cmd, 
@@ -110,7 +110,7 @@ float pidYaw(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = fmod((cmd - actual) + M_PI, 2 * M_PI) - M_PI;
+  error = fmod((DEG2RAD(cmd) - DEG2RAD(actual)) + M_PI, 2 * M_PI) - M_PI;
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
@@ -120,7 +120,7 @@ float pidYaw(float cmd,
   }
 
   /* derivative */
-  derivative = (error - errorDerivative)/dt;
+  derivative = ((float)(error - errorDerivative))/dt;
 
   /* calculate output */
   output = YAW_KP * error + YAW_KI * errorInt - YAW_KD * derivative;
@@ -146,5 +146,5 @@ float pidYaw(float cmd,
   }
 
   errorDerivative = error;
-  return output;
+  return RAD2DEG(output);
 }
