@@ -1,6 +1,5 @@
 TODO:
 
-IMU library
 Receiver library
 Motor library
 Degrees -> PWM mapping / conversions
