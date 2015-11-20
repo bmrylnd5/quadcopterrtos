@@ -10,6 +10,7 @@
 #define MAX_THROTTLE 1900
 #define MID_THROTTLE 1500
 #define MIN_THROTTLE 1100
+
 /* mode 2 */
 #define ROLL_CHANNEL     1
 #define PITCH_CHANNEL    2
