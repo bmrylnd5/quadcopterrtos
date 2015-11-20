@@ -1,15 +1,10 @@
 extern "C"
 {
-#include <Servo.h>
-
-#include "motors.h"
 #include "pid.h"
 }
 
+#include "motors.h"
 #include "IMU.h"
-
-// Motor classes
-Servo motors[MOTORS_NUM];
 
 // IMU class
 IMU imu;
@@ -18,6 +13,9 @@ IMU imu;
 void setup()
 {
    Serial.begin(115200);
+
+   // Initialize motors
+   setupMotors();
 
    // Initialize IMU
    imu.SetupIMU();
@@ -36,6 +34,7 @@ inline void printYPR(const float yaw, const float pitch, const float roll)
 // Quadcopter state machine (main loop)
 void loop()
 {
+#if 0
    /* commands */
    float arm         = 0.0;
    float yawCmd      = 0.0;
@@ -81,4 +80,6 @@ void loop()
    {
       /* turn off motors */
    }
+#endif
+   motorDebug();
 }
