@@ -1,5 +1,8 @@
 // IMU implementation for Quadcopter. 
 
+//necessary to add before EnableInterrupt to avoid collision (all but 1 file)
+#define LIBCALL_ENABLEINTERRUPT
+#include <EnableInterrupt.h>
 #include <Wire.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
@@ -50,7 +53,7 @@ void IMU::SetupIMU()
 
       // enable Arduino interrupt detection
       Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-      attachInterrupt(digitalPinToInterrupt(IMU_INT_PIN), DmpDataReady, RISING);
+      enableInterrupt(IMU_INT_PIN, DmpDataReady, RISING);
 
       // set our DMP Ready flag so the main loop() function knows it's okay to use it
       Serial.println(F("DMP ready! Waiting for first interrupt..."));

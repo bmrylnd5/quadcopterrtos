@@ -41,14 +41,12 @@ class Receiver
    // Array offset for the specified PIN
    static inline unsigned int PinIndex(unsigned int pin);
    
-   // ISR for Chan 1
+   // ISR for specific channels
    static void PwmIn1Isr();
-   
-   // ISR for Chan 2
    static void PwmIn2Isr();
-   
-   // ISR for Chan 3
-  static void PwmIn3Isr();
+   static void PwmIn3Isr();
+   static void PwmIn4Isr();
+   static void PwmIn5Isr();
 
    void PrintDebug(unsigned int chanNum, unsigned int &dutyCycle, unsigned long &lastLow, unsigned long &lastHigh);
 

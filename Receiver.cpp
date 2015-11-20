@@ -1,6 +1,7 @@
 // Receiver implementation for Quadcopter. 
 
 #include <Arduino.h>
+#include <EnableInterrupt.h>
 #include <stdio.h>
 
 #include "pinmap.h"
@@ -14,7 +15,7 @@ typedef struct
    unsigned long ticksLow;    // Number of timer ticks while LOW.
 } pwmTickCount;
 
-static const unsigned int PWM_IN_NUM   = 3;     // Number of input PWM signals.
+static const unsigned int PWM_IN_NUM   = 5;     // Number of input PWM signals.
 static const unsigned int STALE_THRESH = 20000; // Threshold in us for last reception
 static const int BASE_VAL              = 50;    // Center command value
 
@@ -36,9 +37,9 @@ int Channel::GetError() { return mError; }
 Receiver::Receiver() :
    mYaw(REC_CHAN_1_PIN, 8),
    mPitch(REC_CHAN_3_PIN, -1),
-   mRoll(0, 0),
+   mRoll(REC_CHAN_4_PIN, 2),
    mThrottle(REC_CHAN_2_PIN, 2),
-   mArm(0, 0)
+   mArm(REC_CHAN_5_PIN, 0)
 {
    for (unsigned int i = 0; i < PWM_IN_NUM; i++)
    {
@@ -119,11 +120,32 @@ void Receiver::PwmIn3Isr(void)
    PwmInIsr(REC_CHAN_3_PIN);
 }
 
+void Receiver::PwmIn4Isr(void)
+{
+   PwmInIsr(REC_CHAN_4_PIN);
+}
+
+void Receiver::PwmIn5Isr(void)
+{
+   PwmInIsr(REC_CHAN_5_PIN);
+}
+
 void Receiver::SetupReceiver() 
 {   
-   attachInterrupt(digitalPinToInterrupt(REC_CHAN_1_PIN), PwmIn1Isr, CHANGE);
-   attachInterrupt(digitalPinToInterrupt(REC_CHAN_2_PIN), PwmIn2Isr, CHANGE);
-   attachInterrupt(digitalPinToInterrupt(REC_CHAN_3_PIN), PwmIn3Isr, CHANGE);
+   pinMode(REC_CHAN_1_PIN, INPUT_PULLUP);
+   pinMode(REC_CHAN_2_PIN, INPUT_PULLUP);
+   pinMode(REC_CHAN_3_PIN, INPUT_PULLUP);
+   pinMode(REC_CHAN_4_PIN, INPUT_PULLUP);
+   pinMode(REC_CHAN_5_PIN, INPUT_PULLUP);
+   
+   // external interrupts
+   enableInterrupt(REC_CHAN_1_PIN, PwmIn1Isr, CHANGE);
+   enableInterrupt(REC_CHAN_2_PIN, PwmIn2Isr, CHANGE);
+   enableInterrupt(REC_CHAN_3_PIN, PwmIn3Isr, CHANGE);
+   
+   // pin change interrupts
+   enableInterrupt(REC_CHAN_4_PIN, PwmIn4Isr, CHANGE);
+   enableInterrupt(REC_CHAN_5_PIN, PwmIn5Isr, CHANGE);
 }
 
 void Receiver::PrintDebug(unsigned int chanNum, unsigned int &dutyCycle, unsigned long &lastLow, unsigned long &lastHigh)
@@ -149,15 +171,16 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       mIsrDataInUse[i] = false;
    }
    
-   // check ARM command for last update time to ensure we are actively receiving data
-   if (abs(micros() - mPwmLastCount[0].ticksStart) > STALE_THRESH)
+   // check command for last update time to ensure we are actively receiving data
+   // Note: ARM command does not work with this method
+   if (abs(micros() - mPwmLastCount[PinIndex(mYaw.GetPin())].ticksStart) > STALE_THRESH)
    {
       // ERROR
       yaw = BASE_VAL;
       pitch = BASE_VAL;
       roll = BASE_VAL;
       throttle = BASE_VAL;
-      arm = BASE_VAL;
+      arm = 0;
    }
    else
    {
@@ -176,5 +199,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       yaw      = dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError();
       throttle = dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError();
       pitch    = dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError();
+      roll     = dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError();
+      arm      = dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError();
    }
 }
