@@ -5,9 +5,13 @@ extern "C"
 
 #include "motors.h"
 #include "IMU.h"
+#include "Receiver.h"
 
 // IMU class
 IMU imu;
+
+// Receiver class
+Receiver receiver;
 
 // Initialize Quadcopter 
 void setup()
@@ -19,6 +23,9 @@ void setup()
 
    // Initialize IMU
    imu.SetupIMU();
+   
+   // Set up receiver PWM interrupts
+   receiver.SetupReceiver();
 }
 
 // Outputs yaw, pitch, and roll via serial.
@@ -34,12 +41,13 @@ inline void printYPR(const float yaw, const float pitch, const float roll)
 // Quadcopter state machine (main loop)
 void loop()
 {
-#if 0
+#if 1
    /* commands */
-   float arm         = 0.0;
-   float yawCmd      = 0.0;
-   float pitchCmd    = 0.0;
-   float rollCmd     = 0.0;
+   int arm           = 0;
+   int throttleCmd   = 0;
+   int yawCmd        = 0;
+   int pitchCmd      = 0;
+   int rollCmd       = 0;
 
    // float throttleCmd = 0.0; TODO not yet used
    float newYawCmd   = 0.0;
@@ -53,6 +61,7 @@ void loop()
    float rollDeg  = 0.0;
 
   /* read receiver */
+   receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
    Serial.print(F("YPR Rec CMD: "));
    printYPR(yawCmd, pitchCmd, rollCmd);
 
@@ -80,6 +89,7 @@ void loop()
    {
       /* turn off motors */
    }
-#endif
+#else
    motorDebug();
+#endif
 }
