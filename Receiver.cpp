@@ -180,7 +180,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       yaw = BASE_VAL_DEG;
       pitch = BASE_VAL_DEG;
       roll = BASE_VAL_DEG;
-      throttle = BASE_VAL_DEG;
+      throttle = BASE_VAL_DUTY;
       arm = 0;
    }
    else
@@ -200,9 +200,11 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       
       // account for error then convert to degrees (0 -180)
       yaw      = (int)(1.8 * (dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError()));
-      throttle = (int)(1.8 * (dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError()));
       pitch    = (int)(1.8 * (dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError()));
       roll     = (int)(1.8 * (dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError()));
-      arm      = (int)(1.8 * (dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError()));
+      
+      // do not convert to degrees
+      throttle = dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError();
+      arm      = dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError();
    }
 }
