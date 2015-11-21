@@ -28,20 +28,21 @@ void setup()
    receiver.SetupReceiver();
 }
 
-// Outputs yaw, pitch, and roll via serial.
-inline void printYPR(const float yaw, const float pitch, const float roll)
+// Outputs yaw, pitch, roll, and throttle via serial.
+inline void printYPRT(const float yaw, const float pitch, const float roll, const int throttle)
 {
       Serial.print(yaw);
       Serial.print(",");
       Serial.print(pitch);
       Serial.print(",");
-      Serial.println(roll);
+      Serial.print(roll);
+      Serial.print(",   ");
+      Serial.println(throttle);
 }
 
 // Quadcopter state machine (main loop)
 void loop()
 {
-#if 1
    /* commands */
    int arm           = 0;
    int throttleCmd   = 0;
@@ -62,27 +63,27 @@ void loop()
 
   /* read receiver */
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
-   Serial.print(F("YPR Rec CMD: "));
-   printYPR(yawCmd, pitchCmd, rollCmd);
-   
+   Serial.print(F("YPRT Rec CMD: "));
+   printYPRT(yawCmd, pitchCmd, rollCmd, throttleCmd);
+
    delay(500);
    return;
 
    /* quadcopter must be armed to fly */
-   if (arm < BASE_VAL_DEG)
+   if (arm < MID_THROTTLE)
    {
       /* read IMU for each channel - in degrees */
       imu.ReadIMU(yawDeg, pitchDeg, rollDeg);
-      Serial.print(F("YPR IMU Val: "));
-      printYPR(yawDeg, pitchDeg, rollDeg);
+      Serial.print(F("YPRT IMU Val: "));
+      printYPRT(yawDeg, pitchDeg, rollDeg, throttleCmd);
 
       /* adjust command using PID - in degrees */
       newYawCmd   = pidYaw(yawCmd,     yawDeg);
       newPitchCmd = pidPitch(pitchCmd, pitchDeg);
       newRollCmd  = pidRoll(rollCmd,   rollDeg);
 
-      Serial.print(F("YPR PID CMD: "));
-      printYPR(newYawCmd, newPitchCmd, newRollCmd);
+      Serial.print(F("YPRT PID CMD: "));
+      printYPRT(newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
 
       /* convert degrees to PWM (us) */
 
@@ -90,9 +91,7 @@ void loop()
    }
    else
    {
+      Serial.println(F("ARM command below threshold"));
       /* turn off motors */
    }
-#else
-   motorDebug();
-#endif
 }
