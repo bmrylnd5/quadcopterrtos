@@ -17,7 +17,8 @@ typedef struct
 
 static const unsigned int PWM_IN_NUM   = 5;     // Number of input PWM signals.
 static const unsigned int STALE_THRESH = 20000; // Threshold in us for last reception
-static const int BASE_VAL              = 50;    // Center command value
+static const int BASE_VAL_DUTY         = 50;    // Center command value (duty cycle)
+const int BASE_VAL_DEG                 = 90;    // Center command value (degrees)
 
 // Protects critical section
 static volatile bool mIsrDataInUse[PWM_IN_NUM];
@@ -35,10 +36,10 @@ unsigned int Channel::GetPin() { return mPin; }
 int Channel::GetError() { return mError; }
 
 Receiver::Receiver() :
-   mYaw(REC_CHAN_1_PIN, 8),
-   mPitch(REC_CHAN_3_PIN, -1),
-   mRoll(REC_CHAN_4_PIN, 2),
-   mThrottle(REC_CHAN_2_PIN, 2),
+   mYaw(REC_CHAN_4_PIN, 0),
+   mPitch(REC_CHAN_2_PIN, 0),
+   mRoll(REC_CHAN_1_PIN, 0),
+   mThrottle(REC_CHAN_3_PIN, 0),
    mArm(REC_CHAN_5_PIN, 0)
 {
    for (unsigned int i = 0; i < PWM_IN_NUM; i++)
@@ -172,14 +173,14 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
    }
    
    // check command for last update time to ensure we are actively receiving data
-   // Note: ARM command does not work with this method
-   if (abs(micros() - mPwmLastCount[PinIndex(mYaw.GetPin())].ticksStart) > STALE_THRESH)
+   // Note: must use an external interrupt pin
+   if (abs(micros() - mPwmLastCount[PinIndex(REC_CHAN_1_PIN)].ticksStart) > STALE_THRESH)
    {
       // ERROR
-      yaw = BASE_VAL;
-      pitch = BASE_VAL;
-      roll = BASE_VAL;
-      throttle = BASE_VAL;
+      yaw = BASE_VAL_DEG;
+      pitch = BASE_VAL_DEG;
+      roll = BASE_VAL_DEG;
+      throttle = BASE_VAL_DEG;
       arm = 0;
    }
    else
@@ -191,15 +192,17 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
          dutyCycle[i] = (lastHigh[i] * 1000) / (lastHigh[i] + lastLow [i]);
          
          // normalize duty cycle around 50%
-         dutyCycle[i] = (dutyCycle[i] - BASE_VAL) * 2;
-
-         //PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);
+         dutyCycle[i] = (dutyCycle[i] - BASE_VAL_DUTY) * 2;
+         
+         PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);
       }
       
-      yaw      = dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError();
-      throttle = dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError();
-      pitch    = dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError();
-      roll     = dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError();
-      arm      = dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError();
+      
+      // account for error then convert to degrees (0 -180)
+      yaw      = (int)(1.8 * (dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError()));
+      throttle = (int)(1.8 * (dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError()));
+      pitch    = (int)(1.8 * (dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError()));
+      roll     = (int)(1.8 * (dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError()));
+      arm      = (int)(1.8 * (dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError()));
    }
 }

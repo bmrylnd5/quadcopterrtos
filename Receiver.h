@@ -1,6 +1,8 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
+extern const int BASE_VAL_DEG;
+
 // Encapsulates a receiver channel
 class Channel
 {

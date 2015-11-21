@@ -64,9 +64,12 @@ void loop()
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
    Serial.print(F("YPR Rec CMD: "));
    printYPR(yawCmd, pitchCmd, rollCmd);
+   
+   delay(500);
+   return;
 
    /* quadcopter must be armed to fly */
-   if (arm < MID_THROTTLE)
+   if (arm < BASE_VAL_DEG)
    {
       /* read IMU for each channel - in degrees */
       imu.ReadIMU(yawDeg, pitchDeg, rollDeg);
