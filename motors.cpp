@@ -3,6 +3,11 @@
 #include "motors.h"
 #include "pinmap.h"
 
+int motorMappings[4][4] = {{ 1, -1,  1, 1},  // pitch, roll, yaw, throttle
+                           {-1,  1,  1, 1},
+                           { 1,  1, -1, 1},
+                           {-1, -1, -1, 1}};
+
 // Motor classes
 Servo motors[MOTORS_NUM];
 
@@ -58,6 +63,7 @@ void setSpeed(motorEnum motor, int pwm)
 	if (motor >= MOTOR_1 && motor <= MOTOR_4)
 	{
 		int angle = map(constrain(pwm, MIN_THROTTLE, MAX_THROTTLE), MIN_THROTTLE, MAX_THROTTLE, 0, 180);
+		Serial.println(angle);
 		motors[motor].write(angle);    
 	}
 }
@@ -74,4 +80,15 @@ void motorDebug(void)
 	setSpeed(MOTOR_4, speed);
 
 	Serial.println(speed);
+}
+
+void controlMotors(int yaw, int pitch, int roll, int throttle)
+{
+	for (int i = 0; i < MOTORS_NUM; i++)
+	{
+		setSpeed((motorEnum)i, (throttle * motorMappings[i][THROTTLE_MAPPING]) + 
+							   (roll     * motorMappings[i][ROLL_MAPPING]) + 
+							   (pitch    * motorMappings[i][PITCH_MAPPING]) + 
+							   (yaw      * motorMappings[i][YAW_MAPPING]));
+	}
 }

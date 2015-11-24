@@ -67,10 +67,9 @@ void loop()
    printYPRT(yawCmd, pitchCmd, rollCmd, throttleCmd);
 
    delay(500);
-   return;
 
    /* quadcopter must be armed to fly */
-   if (arm < MID_THROTTLE)
+   if (arm < ARM_PERCENT)
    {
       /* read IMU for each channel - in degrees */
       imu.ReadIMU(yawDeg, pitchDeg, rollDeg);
@@ -88,6 +87,7 @@ void loop()
       /* convert degrees to PWM (us) */
 
       /* output to motors - in microseconds */
+      controlMotors(newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
    }
    else
    {

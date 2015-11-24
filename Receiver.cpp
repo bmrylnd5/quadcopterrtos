@@ -4,6 +4,7 @@
 #include <EnableInterrupt.h>
 #include <stdio.h>
 
+#include "pid.h"
 #include "pinmap.h"
 #include "Receiver.h"
 
@@ -202,9 +203,13 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       yaw      = (int)(1.8 * (dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError()));
       pitch    = (int)(1.8 * (dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError()));
       roll     = (int)(1.8 * (dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError()));
-      
+
       // do not convert to degrees
       throttle = dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError();
       arm      = dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError();
+
+      yaw      = constrain(yaw, YAW_LOWER_LIMIT, YAW_UPPER_LIMIT);
+      pitch    = constrain(pitch, PITCH_LOWER_LIMIT, PITCH_UPPER_LIMIT);
+      roll     = constrain(roll, ROLL_LOWER_LIMIT, ROLL_UPPER_LIMIT);
    }
 }

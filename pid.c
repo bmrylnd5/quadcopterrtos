@@ -13,7 +13,7 @@ float pidPitch(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = DEG2RAD(cmd) - DEG2RAD(actual);
+  error = cmd - actual;
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
@@ -49,7 +49,7 @@ float pidPitch(float cmd,
   }
 
   errorDerivative = error;
-  return RAD2DEG(output);
+  return output;
 }
 
 float pidRoll(float cmd, 
@@ -62,7 +62,7 @@ float pidRoll(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = DEG2RAD(cmd) - DEG2RAD(actual);
+  error = cmd - actual;
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
@@ -98,7 +98,7 @@ float pidRoll(float cmd,
   }
 
   errorDerivative = error;
-  return RAD2DEG(output);
+  return output;
 }
 
 float pidYaw(float cmd, 
@@ -111,7 +111,7 @@ float pidYaw(float cmd,
   float        output          = 0.0;
 
   /* calculate error */
-  error = fmod((DEG2RAD(cmd) - DEG2RAD(actual)) + M_PI, 2 * M_PI) - M_PI;
+  error = fmod((cmd - actual) + M_PI, 2 * M_PI) - M_PI;
 
   /* don't integrate if error is small */
   if (abs(error) > epsilon)
@@ -147,5 +147,5 @@ float pidYaw(float cmd,
   }
 
   errorDerivative = error;
-  return RAD2DEG(output);
+  return output;
 }
