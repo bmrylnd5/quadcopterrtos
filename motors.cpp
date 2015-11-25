@@ -63,7 +63,7 @@ void setSpeed(motorEnum motor, int pwm)
 	if (motor >= MOTOR_1 && motor <= MOTOR_4)
 	{
 		int angle = map(constrain(pwm, MIN_THROTTLE, MAX_THROTTLE), MIN_THROTTLE, MAX_THROTTLE, 0, 180);
-		Serial.println(angle);
+		Serial.println(pwm);
 		motors[motor].write(angle);    
 	}
 }
@@ -86,9 +86,9 @@ void controlMotors(int yaw, int pitch, int roll, int throttle)
 {
 	for (int i = 0; i < MOTORS_NUM; i++)
 	{
-		setSpeed((motorEnum)i, (throttle * motorMappings[i][THROTTLE_MAPPING]) + 
-							   (roll     * motorMappings[i][ROLL_MAPPING]) + 
-							   (pitch    * motorMappings[i][PITCH_MAPPING]) + 
-							   (yaw      * motorMappings[i][YAW_MAPPING]));
+		setSpeed((motorEnum)i, (pitch       * motorMappings[i][PITCH_MAPPING]) + 
+							   (roll        * motorMappings[i][ROLL_MAPPING]) + 
+							   (yaw         * motorMappings[i][YAW_MAPPING]) + 
+							   (throttle * motorMappings[i][THROTTLE_MAPPING]));
 	}
 }

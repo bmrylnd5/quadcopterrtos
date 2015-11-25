@@ -4,6 +4,7 @@
 #include <EnableInterrupt.h>
 #include <stdio.h>
 
+#include "motors.h"
 #include "pid.h"
 #include "pinmap.h"
 #include "Receiver.h"
@@ -200,16 +201,17 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       
       
       // account for error then convert to degrees (0 -180)
-      yaw      = (int)(1.8 * (dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError()));
-      pitch    = (int)(1.8 * (dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError()));
-      roll     = (int)(1.8 * (dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError()));
+      yaw      = map(dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError(), 0, 100, YAW_UPPER_LIMIT, YAW_LOWER_LIMIT);
+      pitch    = map(dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError(), 0, 100, PITCH_UPPER_LIMIT, PITCH_LOWER_LIMIT);
+      roll     = map(dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError(), 0, 100, ROLL_UPPER_LIMIT, ROLL_LOWER_LIMIT);
 
       // do not convert to degrees
-      throttle = dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError();
+      throttle = map(dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError(), 0, 100, MIN_THROTTLE, MAX_THROTTLE);
       arm      = dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError();
 
       yaw      = constrain(yaw, YAW_LOWER_LIMIT, YAW_UPPER_LIMIT);
       pitch    = constrain(pitch, PITCH_LOWER_LIMIT, PITCH_UPPER_LIMIT);
       roll     = constrain(roll, ROLL_LOWER_LIMIT, ROLL_UPPER_LIMIT);
+      throttle = constrain(throttle, MIN_THROTTLE, MAX_THROTTLE);
    }
 }

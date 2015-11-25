@@ -7,6 +7,8 @@ extern "C"
 #include "IMU.h"
 #include "Receiver.h"
 
+#define MOTOR_DEBUG 0
+
 // IMU class
 IMU imu;
 
@@ -43,6 +45,7 @@ inline void printYPRT(const float yaw, const float pitch, const float roll, cons
 // Quadcopter state machine (main loop)
 void loop()
 {
+#if MOTOR_DEBUG == 0
    /* commands */
    int arm           = 0;
    int throttleCmd   = 0;
@@ -50,7 +53,6 @@ void loop()
    int pitchCmd      = 0;
    int rollCmd       = 0;
 
-   // float throttleCmd = 0.0; TODO not yet used
    float newYawCmd   = 0.0;
    float newPitchCmd = 0.0;
    float newRollCmd  = 0.0;
@@ -65,8 +67,6 @@ void loop()
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
    Serial.print(F("YPRT Rec CMD: "));
    printYPRT(yawCmd, pitchCmd, rollCmd, throttleCmd);
-
-   delay(500);
 
    /* quadcopter must be armed to fly */
    if (arm < ARM_PERCENT)
@@ -91,7 +91,13 @@ void loop()
    }
    else
    {
-      Serial.println(F("ARM command below threshold"));
       /* turn off motors */
+      for (int i = MOTOR_1; i <= MOTOR_4; i++)
+      {
+         setSpeed((motorEnum)i, MIN_THROTTLE);
+      }
    }
+#else
+   motorDebug();
+#endif
 }
