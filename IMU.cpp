@@ -50,6 +50,9 @@ void IMU::SetupIMU()
       // turn on the DMP, now that it's ready
       Serial.println(F("Enabling DMP..."));
       mpu.setDMPEnabled(true);
+	  
+      // Enable low pass filtering of readings
+      mpu.setDLPFMode(MPU6050_DLPF_BW_42);
 
       // enable Arduino interrupt detection
       Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
