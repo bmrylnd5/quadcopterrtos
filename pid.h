@@ -6,21 +6,21 @@
 
 /* UNITS ARE IN RADIANS */
 /* gains - TUNE ME */
-#define PITCH_KP           0.5
-#define PITCH_KI           0.0
-#define PITCH_KD           0.0
+#define PITCH_KP           1
+#define PITCH_KI           1
+#define PITCH_KD           1
 #define PITCH_UPPER_LIMIT  45
 #define PITCH_LOWER_LIMIT -45
 
-#define ROLL_KP            0.5
-#define ROLL_KI            0.0
-#define ROLL_KD            0.0
+#define ROLL_KP            1
+#define ROLL_KI            1
+#define ROLL_KD            1
 #define ROLL_UPPER_LIMIT   45
 #define ROLL_LOWER_LIMIT  -45
 
-#define YAW_KP             0.5
-#define YAW_KI             0.0
-#define YAW_KD             0.0
+#define YAW_KP             1
+#define YAW_KI             1
+#define YAW_KD             1
 #define YAW_UPPER_LIMIT    45
 #define YAW_LOWER_LIMIT   -45
 

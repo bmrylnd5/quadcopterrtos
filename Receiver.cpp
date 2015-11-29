@@ -196,7 +196,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
          // normalize duty cycle around 50%
          dutyCycle[i] = (dutyCycle[i] - BASE_VAL_DUTY) * 2;
          
-         PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);
+         //PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);
       }
       
       

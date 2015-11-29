@@ -25,7 +25,7 @@ static void armMotors(void)
 	}
 
 	Serial.println("Enable power now...");
-	delay(5000);
+	delay(7000);
 
 	// arm the speed controller, modify as necessary for your ESC  
 	for (int i = MOTOR_1; i <= MOTOR_4; i++)
@@ -33,18 +33,10 @@ static void armMotors(void)
 		setSpeed((motorEnum)i, MIN_THROTTLE);
 	}
 
-	delay(2000);
+	delay(10000);
 
 	Serial.println("Calibration finished...");
 #endif /* CALIBRATE */
-
-	// arm the speed controller, modify as necessary for your ESC  
-	for (int i = MOTOR_1; i <= MOTOR_4; i++)
-	{
-		setSpeed((motorEnum)i, MIN_THROTTLE + 100);
-	}
-
-	delay(2000);
 }
 
 void setupMotors(void)
@@ -62,9 +54,9 @@ void setSpeed(motorEnum motor, int pwm)
 {
 	if (motor >= MOTOR_1 && motor <= MOTOR_4)
 	{
-		int angle = map(constrain(pwm, MIN_THROTTLE, MAX_THROTTLE), MIN_THROTTLE, MAX_THROTTLE, 0, 180);
 		Serial.println(pwm);
-		motors[motor].write(angle);    
+		pwm = constrain(pwm, MIN_THROTTLE, MAX_THROTTLE);
+		motors[motor].writeMicroseconds(pwm);    
 	}
 }
 
@@ -74,21 +66,21 @@ void motorDebug(void)
 	while(!Serial.available());
 	int speed = Serial.parseInt();
 
-	setSpeed(MOTOR_1, speed);
-	setSpeed(MOTOR_2, speed);
-	setSpeed(MOTOR_3, speed);
-	setSpeed(MOTOR_4, speed);
-
+	for (int i = MOTOR_1; i < MOTORS_NUM; i++)
+	{
+		setSpeed((motorEnum)i, speed);
+	}
+	
 	Serial.println(speed);
 }
 
 void controlMotors(int yaw, int pitch, int roll, int throttle)
 {
-	for (int i = 0; i < MOTORS_NUM; i++)
+	for (int i = MOTOR_1; i < MOTORS_NUM; i++)
 	{
-		setSpeed((motorEnum)i, (pitch       * motorMappings[i][PITCH_MAPPING]) + 
-							   (roll        * motorMappings[i][ROLL_MAPPING]) + 
-							   (yaw         * motorMappings[i][YAW_MAPPING]) + 
+		setSpeed((motorEnum)i, (pitch    * motorMappings[i][PITCH_MAPPING]) + 
+							   (roll     * motorMappings[i][ROLL_MAPPING]) + 
+							   (yaw      * motorMappings[i][YAW_MAPPING]) + 
 							   (throttle * motorMappings[i][THROTTLE_MAPPING]));
 	}
 }
