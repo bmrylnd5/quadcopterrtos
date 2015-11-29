@@ -92,9 +92,10 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
     }
 
    // wait for MPU interrupt or extra packet(s) available
-   while (!mpuInterrupt && (mFifoCount < mPacketSize)) 
+   if (!mpuInterrupt && (mFifoCount < mPacketSize)) 
    {
       // Do nothing
+      return;
    }
 
    // reset interrupt flag and get INT_STATUS byte
@@ -108,7 +109,7 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
    if ((mpuIntStatus & 0x10) || (mFifoCount == 1024)) 
    {
       // reset so we can continue cleanly
-      mpu.resetFIFO();
+      //mpu.resetFIFO();
       Serial.println(F("FIFO overflow!"));
    } 
    // otherwise, check for DMP data ready interrupt (this should happen frequently)

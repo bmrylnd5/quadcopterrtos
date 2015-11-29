@@ -11,12 +11,12 @@ int motorMappings[4][4] = {{ 1, -1,  1, 1},  // pitch, roll, yaw, throttle
 // Motor classes
 Servo motors[MOTORS_NUM];
 
-/*
- * Arm all the motors
- */
-static void armMotors(void)
-{
 #if (CALIBRATE == 1)
+/*
+ * Calibrate all the motors
+ */
+static void calibrateMotors(void)
+{
 	Serial.println("Calibrating motors...");
 	// arm the speed controller, modify as necessary for your ESC  
 	for (int i = MOTOR_1; i <= MOTOR_4; i++)
@@ -25,7 +25,7 @@ static void armMotors(void)
 	}
 
 	Serial.println("Enable power now...");
-	delay(7000);
+	delay(5000);
 
 	// arm the speed controller, modify as necessary for your ESC  
 	for (int i = MOTOR_1; i <= MOTOR_4; i++)
@@ -33,30 +33,31 @@ static void armMotors(void)
 		setSpeed((motorEnum)i, MIN_THROTTLE);
 	}
 
-	delay(10000);
+	delay(7000);
 
 	Serial.println("Calibration finished...");
-#endif /* CALIBRATE */
 }
+#endif /* CALIBRATE */
 
 void setupMotors(void)
 {
 	Serial.println("Initializing motors...");
-	motors[0].attach(MOTOR_1_PIN);
-	motors[1].attach(MOTOR_2_PIN);
-	motors[2].attach(MOTOR_3_PIN);
-	motors[3].attach(MOTOR_4_PIN);
+	motors[0].attach(MOTOR_1_PIN, MIN_THROTTLE, MAX_THROTTLE);
+	motors[1].attach(MOTOR_2_PIN, MIN_THROTTLE, MAX_THROTTLE);
+	motors[2].attach(MOTOR_3_PIN, MIN_THROTTLE, MAX_THROTTLE);
+	motors[3].attach(MOTOR_4_PIN, MIN_THROTTLE, MAX_THROTTLE);
 
-	armMotors();
+#if (CALIBRATE == 1)
+	calibrateMotors();
+#endif /* CALIBRATE */
 }
 
 void setSpeed(motorEnum motor, int pwm)
 {
 	if (motor >= MOTOR_1 && motor <= MOTOR_4)
 	{
-		Serial.println(pwm);
-		pwm = constrain(pwm, MIN_THROTTLE, MAX_THROTTLE);
-		motors[motor].writeMicroseconds(pwm);    
+		motors[motor].writeMicroseconds(pwm);
+		delay(25);
 	}
 }
 

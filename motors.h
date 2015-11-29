@@ -10,7 +10,7 @@
 #define ARM_PERCENT  50
 
 /*  min/max throttles for each motor */
-#define MAX_THROTTLE 1800
+#define MAX_THROTTLE 1900
 #define MID_THROTTLE 1500
 #define MIN_THROTTLE 1200
 
