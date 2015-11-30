@@ -16,7 +16,7 @@ IMU imu;
 Receiver receiver;
 
 /* commands */
-int arm                  = 0;
+static int arm           = 0;
 static int throttleCmd   = 0;
 static int yawCmd        = 0;
 static int pitchCmd      = 0;
@@ -31,22 +31,21 @@ static float yawDeg      = 0.0;
 static float pitchDeg    = 0.0;
 static float rollDeg     = 0.0;
 
-void imuThread(void * arg)
+void imuThread(void)
 {
-#if 1
    /* read IMU for each channel - in degrees */
    imu.ReadIMU(yawDeg, pitchDeg, rollDeg);
-#endif 
-   (void)arg;
+   
+   Serial.print(F("YPRT IMU Val: "));
+   printYPRT(1, yawDeg, pitchDeg, rollDeg, throttleCmd);
 }
 
 // Quadcopter state machine (main loop)
-void quadThread(void * arg)
+void quadThread(void)
 {
 #if MOTOR_DEBUG == 0
    /* read receiver */
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
-
    
    Serial.print(F("YPRT Rec CMD: "));
    printYPRT(1, yawCmd, pitchCmd, rollCmd, throttleCmd);
@@ -54,9 +53,6 @@ void quadThread(void * arg)
    /* quadcopter must be armed to fly */
    if (arm < ARM_PERCENT)
    {
-      Serial.print(F("YPRT IMU Val: "));
-      printYPRT(1, yawDeg, pitchDeg, rollDeg, throttleCmd);
-
       /* adjust command using PID - in degrees */
       newYawCmd   = pidYaw(yawCmd,     yawDeg);
       newPitchCmd = pidPitch(pitchCmd, pitchDeg);
@@ -77,7 +73,6 @@ void quadThread(void * arg)
 #else
    motorDebug();
 #endif
-(void)arg;
 }
 
 // Initialize Quadcopter 
@@ -124,6 +119,6 @@ inline void printYPRT(const int port, const float yaw, const float pitch, const 
 
 void loop()
 {
-   quadThread(NULL);
-   imuThread(NULL);  
+   quadThread();
+   imuThread();  
 }

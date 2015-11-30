@@ -3,9 +3,13 @@
 //necessary to add before EnableInterrupt to avoid collision (all but 1 file)
 #define LIBCALL_ENABLEINTERRUPT
 #include <EnableInterrupt.h>
-#include <Wire.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#include "Wire.h"
+#endif
+
 
 #include "pinmap.h"
 #include "IMU.h"
@@ -29,8 +33,12 @@ void IMU::SetupIMU()
    uint8_t devStatus;   // return status after device operation (0 = success, !0 = error)
 
    // Init I2C bus
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
    Wire.begin();
-   TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
+   TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
+#elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+   Fastwire::setup(400, true);
+#endif
 
    // Init IMU
    Serial.println(F("Initializing I2C devices..."));
@@ -109,7 +117,7 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
    if ((mpuIntStatus & 0x10) || (mFifoCount == 1024)) 
    {
       // reset so we can continue cleanly
-      //mpu.resetFIFO();
+      mpu.resetFIFO();
       Serial.println(F("FIFO overflow!"));
    } 
    // otherwise, check for DMP data ready interrupt (this should happen frequently)

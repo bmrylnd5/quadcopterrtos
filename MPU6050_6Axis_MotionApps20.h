@@ -397,7 +397,7 @@ uint8_t MPU6050::dmpInitialize() {
             DEBUG_PRINTLN(F("Setting DMP and FIFO_OFLOW interrupts enabled..."));
             setIntEnabled(0x12);
 
-            DEBUG_PRINTLN(F("Setting sample rate to 440Hz..."));
+            DEBUG_PRINTLN(F("Setting sample rate to 40Hz..."));
             setRate(24); // 1khz / (1 + 24) = 40 Hz
 
             DEBUG_PRINTLN(F("Setting external frame sync to TEMP_OUT_L[0]..."));
