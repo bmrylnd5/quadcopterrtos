@@ -9,11 +9,16 @@ extern "C"
 
 #define MOTOR_DEBUG 0
 
+const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
+
 // IMU class
 IMU imu;
 
 // Receiver class
 Receiver receiver;
+
+// Motors set class
+MotorSet motors;
 
 /* commands */
 static int arm           = 0;
@@ -51,7 +56,7 @@ void quadThread(void)
    printYPRT(1, yawCmd, pitchCmd, rollCmd, throttleCmd);
 
    /* quadcopter must be armed to fly */
-   if (arm < ARM_PERCENT)
+   if (arm > ARM_PERCENT)
    {
       /* adjust command using PID - in degrees */
       newYawCmd   = pidYaw(yawCmd,     yawDeg);
@@ -62,13 +67,13 @@ void quadThread(void)
       printYPRT(1, newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
 
       /* output to motors - in microseconds */
-      controlMotors(newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
+      motors.controlMotors(newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
    }
    else
    {
       /* turn off motors */
       Serial.println(F("Disarming motors"));
-      controlMotors(0, 0, 0, MIN_THROTTLE);
+      motors.controlMotors(BASE_VAL_DEG, BASE_VAL_DEG, BASE_VAL_DEG, MIN_THROTTLE);
    }
 #else
    motorDebug();
@@ -82,7 +87,7 @@ void setup()
    //Serial2.begin(115200);
 
    // Initialize motors
-   setupMotors();
+   motors.setupMotors();
 
    // Initialize IMU
    imu.SetupIMU();
