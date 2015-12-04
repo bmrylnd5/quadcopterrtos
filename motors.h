@@ -11,8 +11,8 @@ const int MOTORS_NUM    = 4;  // number of Servo motors
 const int MAX_THROTTLE  = 1900;
 const int MIN_THROTTLE  = 1200;
 
-#if 0
 // unused
+#if 0
 const int MID_THROTTLE  = 1500;
 /* mode 2 */
 #define ROLL_CHANNEL     1
@@ -26,21 +26,20 @@ const int MID_THROTTLE  = 1500;
 class ServoMotor
 {
  public:
-   ServoMotor() {}
    ServoMotor(const unsigned int pin, const int error, 
               const int pitch, const int roll, const int yaw, const int throttle);
    
    void SetupMotor();               // Attach and bound Servo motor
    void SetSpeed(const int pwm);    // Set the speed of a motor 
    
-   unsigned int GetPin()   const { return mPin; }
-   int GetError()          const { return mError; }
+   inline unsigned int GetPin()  const { return mPin; }
+   inline int GetError()         const { return mError; }
    
    // motor mapping getters
-   int GetPitchMap()    const { return mPitch; }
-   int GetRollMap()     const { return mRoll; }
-   int GetYawMap()      const { return mYaw; }
-   int GetThrottleMap() const { return mThrottle; }
+   inline int GetPitchMap()      const { return mPitch; }
+   inline int GetRollMap()       const { return mRoll; }
+   inline int GetYawMap()        const { return mYaw; }
+   inline int GetThrottleMap()   const { return mThrottle; }
    
  private:   
    unsigned int mPin;      // input pin associated with motor

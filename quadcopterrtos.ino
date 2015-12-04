@@ -97,7 +97,7 @@ void setup()
 }
 
 // Outputs yaw, pitch, roll, and throttle via serial.
-inline void printYPRT(const int port, const float yaw, const float pitch, const float roll, const int throttle)
+void printYPRT(const int port, const float yaw, const float pitch, const float roll, const int throttle)
 {
    (void)port;
 	/*if(port == 2)

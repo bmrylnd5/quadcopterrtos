@@ -32,7 +32,7 @@ static volatile bool mIsrDataInUse[PWM_IN_NUM];
 static volatile pwmTickCount mPwmLastCount[PWM_IN_NUM];
 
 // Array offset for the specified PIN
-static inline unsigned int PinIndex(const unsigned int pin)
+static unsigned int PinIndex(const unsigned int pin)
 {
    switch(pin)
    {

@@ -26,17 +26,19 @@ void ServoMotor::SetupMotor()
    mServo.attach(this->mPin, MIN_THROTTLE, MAX_THROTTLE);
 }
 
-MotorSet::MotorSet()
-{/*
-   int motorMappings[4][4] = {{ 1, -1,  1, 1},  // pitch, roll, yaw, throttle
-                              {-1,  1,  1, 1},
-                              { 1,  1, -1, 1},
-                              {-1, -1, -1, 1}}; */
-                           
-   mMotors[0] = ServoMotor(MOTOR_1_PIN, 0,   1, -1,  1, 1);
-   mMotors[1] = ServoMotor(MOTOR_2_PIN, 0,  -1,  1,  1, 1);
-   mMotors[2] = ServoMotor(MOTOR_3_PIN, 0,   1,  1, -1, 1);
-   mMotors[3] = ServoMotor(MOTOR_4_PIN, 0,  -1, -1, -1, 1);
+MotorSet::MotorSet() :
+   mMotors(
+   {
+      ServoMotor(MOTOR_1_PIN, 0,   1, -1,  1, 1),
+      ServoMotor(MOTOR_2_PIN, 0,  -1,  1,  1, 1),
+      ServoMotor(MOTOR_3_PIN, 0,   1,  1, -1, 1),
+      ServoMotor(MOTOR_4_PIN, 0,  -1, -1, -1, 1)
+   })
+{
+/*{{ 1, -1,  1, 1},  // pitch, roll, yaw, throttle
+   {-1,  1,  1, 1},
+   { 1,  1, -1, 1},
+   {-1, -1, -1, 1}}; */
 }
 
 #if (CALIBRATE == 1)
@@ -73,22 +75,22 @@ void MotorSet::setupMotors()
    }
 
 #if (CALIBRATE == 1)
-	calibrateMotors();
+   calibrateMotors();
 #endif /* CALIBRATE */
 }
 
 void MotorSet::motorDebug()
 {
-	Serial.print("Enter pwm value: ");
-	while(!Serial.available());
-	int speed = Serial.parseInt();
+   Serial.print("Enter pwm value: ");
+   while(!Serial.available());
+   int speed = Serial.parseInt();
 
    for (ServoMotor &motor : mMotors)
    {
-		motor.SetSpeed(speed);
-	}
-	
-	Serial.println(speed);
+      motor.SetSpeed(speed);
+   }
+
+   Serial.println(speed);
 }
 
 void MotorSet::controlMotors(const int yaw, const int pitch, const int roll, const int throttle)

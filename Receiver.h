@@ -8,8 +8,9 @@ class Channel
 {
  public:
    Channel(const unsigned int pin, const int error);
-   unsigned int GetPin()   const { return mPin; }
-   int GetError()          const { return mError; }
+   
+   inline unsigned int GetPin()   const { return mPin; }
+   inline int GetError()          const { return mError; }
    
  private:
    unsigned int mPin;   // input pin associated with channel
@@ -37,7 +38,7 @@ class Receiver
  private:
    // Main ISR for PWM calculation
    // Read timer and calculate the number of ticks while the PWM input is HIGH
-   static inline void PwmInIsr(const unsigned int pin);
+   static void PwmInIsr(const unsigned int pin);
 
    // ISR for specific channels
    static void PwmIn1Isr();
