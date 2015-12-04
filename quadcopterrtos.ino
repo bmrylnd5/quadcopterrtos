@@ -7,6 +7,7 @@ extern "C"
 #include "IMU.h"
 #include "Receiver.h"
 
+#define PRINT_DEBUG 1
 #define MOTOR_DEBUG 0
 
 const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
@@ -41,8 +42,7 @@ void imuThread(void)
    /* read IMU for each channel - in degrees */
    imu.ReadIMU(yawDeg, pitchDeg, rollDeg);
    
-   Serial.print(F("YPRT IMU Val: "));
-   printYPRT(1, yawDeg, pitchDeg, rollDeg, throttleCmd);
+   printYPRT(1, "YPRT IMU Val: ", yawDeg, pitchDeg, rollDeg, throttleCmd);
 }
 
 // Quadcopter state machine (main loop)
@@ -52,8 +52,7 @@ void quadThread(void)
    /* read receiver */
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
    
-   Serial.print(F("YPRT Rec CMD: "));
-   printYPRT(1, yawCmd, pitchCmd, rollCmd, throttleCmd);
+   printYPRT(1, "YPRT Rec CMD: ", yawCmd, pitchCmd, rollCmd, throttleCmd);
 
    /* quadcopter must be armed to fly */
    if (arm > ARM_PERCENT)
@@ -63,8 +62,7 @@ void quadThread(void)
       newPitchCmd = pidPitch(pitchCmd, pitchDeg);
       newRollCmd  = pidRoll(rollCmd,   rollDeg);
 
-      Serial.print(F("YPRT PID CMD: "));
-      printYPRT(1, newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
+      printYPRT(1, "YPRT PID CMD: ", newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
 
       /* output to motors - in microseconds */
       motors.controlMotors(newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
@@ -97,21 +95,22 @@ void setup()
 }
 
 // Outputs yaw, pitch, roll, and throttle via serial.
-void printYPRT(const int port, const float yaw, const float pitch, const float roll, const int throttle)
+void printYPRT(const int port, const char * const str, const float yaw, const float pitch, const float roll, const int throttle)
 {
-   (void)port;
-	/*if(port == 2)
-	{
-	   Serial2.print(yaw);
+#if (PRINT_DEBUG == 1)
+   /*if(port == 2)
+   {
+      Serial2.print(yaw);
       Serial2.print(",");
       Serial2.print(pitch);
       Serial2.print(",");
       Serial2.print(roll);
       Serial2.print(",   ");
       Serial2.println(throttle);
-	}
-	else*/
-	{
+   }
+   else*/
+   {
+      Serial.print(str);
       Serial.print(yaw);
       Serial.print(",");
       Serial.print(pitch);
@@ -119,7 +118,15 @@ void printYPRT(const int port, const float yaw, const float pitch, const float r
       Serial.print(roll);
       Serial.print(",   ");
       Serial.println(throttle);
-	}
+   }
+#else
+   (void)str;
+   (void)yaw;
+   (void)pitch;
+   (void)roll;
+   (void)throttle;
+#endif
+   (void) port;
 }
 
 void loop()
