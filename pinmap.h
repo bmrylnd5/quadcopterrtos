@@ -6,7 +6,7 @@
 
 #define IMU_INT_PIN  3  // Pin used for IMU interrupt (PCINT 5)
 
-// Mega using timers 2 and 4
+// Servo motor pin mapping
 // (3)  (1)     cw - ccw
 //    [] 
 // (2)  (4)     ccw - cw

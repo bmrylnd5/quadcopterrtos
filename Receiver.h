@@ -1,22 +1,20 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
-extern const int BASE_VAL_DEG;
+const int BASE_VAL_DEG = 0;     // Center command value (degrees)
 
 // Encapsulates a receiver channel
 class Channel
 {
  public:
-   Channel(unsigned int pin, int error);
-   unsigned int GetPin();
-   int GetError();
+   Channel(const unsigned int pin, const int error);
+   
+   inline unsigned int GetPin()   const { return mPin; }
+   inline int GetError()          const { return mError; }
    
  private:
-   // input pin associated witch channel
-   unsigned int mPin;
-   
-   // Correctional value to achive neutral base command
-   int mError;
+   unsigned int mPin;   // input pin associated with channel
+   int mError;          // Correctional value to achieve neutral base command
 };
 
 class Receiver
@@ -31,18 +29,17 @@ class Receiver
 
    /*
     * Main Receiver loop reading yaw, pitch, roll, throttle, and arm commands.
-    * Values range from 0 to 100  with 50 being the base command
+    * YPR values range from -45 to 45
+    * Throttle values range from MIN_THROTTLE to MAX_THROTTLE
+    * ARM values range from 0 to 100
     */
    void ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int &arm);
 
  private:
    // Main ISR for PWM calculation
    // Read timer and calculate the number of ticks while the PWM input is HIGH
-   static inline void PwmInIsr(unsigned int pin);
-   
-   // Array offset for the specified PIN
-   static inline unsigned int PinIndex(unsigned int pin);
-   
+   static void PwmInIsr(const unsigned int pin);
+
    // ISR for specific channels
    static void PwmIn1Isr();
    static void PwmIn2Isr();
@@ -50,7 +47,10 @@ class Receiver
    static void PwmIn4Isr();
    static void PwmIn5Isr();
 
-   void PrintDebug(unsigned int chanNum, unsigned int &dutyCycle, unsigned long &lastLow, unsigned long &lastHigh);
+   void PrintDebug(const unsigned int chanNum, 
+                   const unsigned int &dutyCycle, 
+                   const unsigned long &lastLow, 
+                   const unsigned long &lastHigh);
 
    Channel mYaw;
    Channel mPitch;

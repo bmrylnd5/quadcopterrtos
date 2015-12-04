@@ -2,12 +2,16 @@
 
 #include <Arduino.h>
 #include <EnableInterrupt.h>
-#include <stdio.h>
 
 #include "motors.h"
 #include "pid.h"
 #include "pinmap.h"
 #include "Receiver.h"
+
+#define REC_DEBUG 0
+#if (REC_DEBUG == 1)
+#include <stdio.h>
+#endif
 
 // Structure holding data used to calculate a PWM duty cycle via timer ticks.
 typedef struct
@@ -17,10 +21,9 @@ typedef struct
    unsigned long ticksLow;    // Number of timer ticks while LOW.
 } pwmTickCount;
 
-static const unsigned int PWM_IN_NUM   = 5;     // Number of input PWM signals.
-static const unsigned int STALE_THRESH = 20000; // Threshold in us for last reception
-static const int BASE_VAL_DUTY         = 50;    // Center command value (duty cycle)
-const int BASE_VAL_DEG                 = 90;    // Center command value (degrees)
+const unsigned int PWM_IN_NUM    = 5;     // Number of input PWM signals.
+const unsigned int STALE_THRESH  = 60000; // Threshold in us for last reception
+const int BASE_VAL_DUTY          = 50;    // Center command value (duty cycle)
 
 // Protects critical section
 static volatile bool mIsrDataInUse[PWM_IN_NUM];
@@ -28,32 +31,8 @@ static volatile bool mIsrDataInUse[PWM_IN_NUM];
 // Tracks each timer data for each PWM input.
 static volatile pwmTickCount mPwmLastCount[PWM_IN_NUM];
 
-Channel::Channel(unsigned int pin, int error) :
-   mPin(pin),
-   mError(error)
-{
-}
-
-unsigned int Channel::GetPin() { return mPin; }
-int Channel::GetError() { return mError; }
-
-Receiver::Receiver() :
-   mYaw(REC_CHAN_4_PIN, 0),
-   mPitch(REC_CHAN_2_PIN, 0),
-   mRoll(REC_CHAN_1_PIN, 0),
-   mThrottle(REC_CHAN_3_PIN, 0),
-   mArm(REC_CHAN_5_PIN, 0)
-{
-   for (unsigned int i = 0; i < PWM_IN_NUM; i++)
-   {
-      mPwmLastCount[i].ticksStart = 0;
-      mPwmLastCount[i].ticksHigh = 0;
-      mPwmLastCount[i].ticksLow = 0;
-      mIsrDataInUse[i] = false;
-   }
-}
-
-unsigned int Receiver::PinIndex(unsigned int pin)
+// Array offset for the specified PIN
+static unsigned int PinIndex(const unsigned int pin)
 {
    switch(pin)
    {
@@ -71,8 +50,30 @@ unsigned int Receiver::PinIndex(unsigned int pin)
          return 0;
    }
 }
+
+Channel::Channel(const unsigned int pin, const int error) :
+   mPin(pin),
+   mError(error)
+{
+}
+
+Receiver::Receiver() :
+   mYaw(REC_CHAN_4_PIN, 0),
+   mPitch(REC_CHAN_2_PIN, 0),
+   mRoll(REC_CHAN_1_PIN, 0),
+   mThrottle(REC_CHAN_3_PIN, 0),
+   mArm(REC_CHAN_5_PIN, 0)
+{
+   for (unsigned int i = 0; i < PWM_IN_NUM; i++)
+   {
+      mPwmLastCount[i].ticksStart = 0;
+      mPwmLastCount[i].ticksHigh = 0;
+      mPwmLastCount[i].ticksLow = 0;
+      mIsrDataInUse[i] = false;
+   }
+}
    
-void Receiver::PwmInIsr(unsigned int pin)
+void Receiver::PwmInIsr(const unsigned int pin)
 {
    unsigned int pinIndex;
    unsigned long tickNow;
@@ -151,13 +152,18 @@ void Receiver::SetupReceiver()
    enableInterrupt(REC_CHAN_5_PIN, PwmIn5Isr, CHANGE);
 }
 
-void Receiver::PrintDebug(unsigned int chanNum, unsigned int &dutyCycle, unsigned long &lastLow, unsigned long &lastHigh)
+#if (REC_DEBUG == 1)
+void Receiver::PrintDebug(const unsigned int chanNum, 
+                          const unsigned int &dutyCycle, 
+                          const unsigned long &lastLow, 
+                          const unsigned long &lastHigh)
 {
    char buf[256];
    snprintf(buf, sizeof(buf), "  Chan %u: %u%% %luus period",
                               chanNum, dutyCycle, lastLow + lastHigh);
    Serial.println(buf);
 }
+#endif
 
 void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int &arm)
 {
@@ -179,11 +185,13 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
    if (abs(micros() - mPwmLastCount[PinIndex(REC_CHAN_1_PIN)].ticksStart) > STALE_THRESH)
    {
       // ERROR
-      yaw = BASE_VAL_DEG;
-      pitch = BASE_VAL_DEG;
-      roll = BASE_VAL_DEG;
-      throttle = BASE_VAL_DUTY;
-      arm = 0;
+      yaw      = BASE_VAL_DEG;
+      pitch    = BASE_VAL_DEG;
+      roll     = BASE_VAL_DEG;
+      throttle = MIN_THROTTLE;
+      arm      = 0;
+      
+      Serial.println(F("Receiver values stale, using default"));
    }
    else
    {
@@ -195,15 +203,16 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
          
          // normalize duty cycle around 50%
          dutyCycle[i] = (dutyCycle[i] - BASE_VAL_DUTY) * 2;
-         
-         //PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);
+
+#if(REC_DEBUG == 1)
+         PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);
+#endif
       }
       
-      
-      // account for error then convert to degrees (0 -180)
-      yaw      = map(dutyCycle[PinIndex(mYaw.GetPin())] + mYaw.GetError(), 0, 100, YAW_UPPER_LIMIT, YAW_LOWER_LIMIT);
+      // account for error then convert to degrees (-45 to 45)
+      yaw      = map(dutyCycle[PinIndex(mYaw.GetPin())]   + mYaw.GetError(),   0, 100, YAW_UPPER_LIMIT, YAW_LOWER_LIMIT);
       pitch    = map(dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError(), 0, 100, PITCH_UPPER_LIMIT, PITCH_LOWER_LIMIT);
-      roll     = map(dutyCycle[PinIndex(mRoll.GetPin())] + mRoll.GetError(), 0, 100, ROLL_UPPER_LIMIT, ROLL_LOWER_LIMIT);
+      roll     = map(dutyCycle[PinIndex(mRoll.GetPin())]  + mRoll.GetError(),  0, 100, ROLL_UPPER_LIMIT, ROLL_LOWER_LIMIT);
 
       // do not convert to degrees
       throttle = map(dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError(), 0, 100, MIN_THROTTLE, MAX_THROTTLE);
