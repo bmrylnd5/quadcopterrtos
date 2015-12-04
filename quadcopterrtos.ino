@@ -8,7 +8,7 @@ extern "C"
 #include "Receiver.h"
 
 #define PRINT_DEBUG 1
-#define MOTOR_DEBUG 0
+#define MOTOR_DEBUG 1
 
 const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
 
@@ -74,7 +74,16 @@ void quadThread(void)
       motors.controlMotors(BASE_VAL_DEG, BASE_VAL_DEG, BASE_VAL_DEG, MIN_THROTTLE);
    }
 #else
-   motorDebug();
+   (void)yawCmd;
+   (void)pitchCmd;
+   (void)rollCmd;
+   (void)throttleCmd;
+   (void)arm;
+   (void)newYawCmd;
+   (void)newPitchCmd;
+   (void)newRollCmd;
+   
+   motors.motorDebug();
 #endif
 }
 
@@ -132,5 +141,5 @@ void printYPRT(const int port, const char * const str, const float yaw, const fl
 void loop()
 {
    quadThread();
-   imuThread();  
+   //imuThread();  
 }

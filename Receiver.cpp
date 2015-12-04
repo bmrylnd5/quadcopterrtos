@@ -8,7 +8,7 @@
 #include "pinmap.h"
 #include "Receiver.h"
 
-#define REC_DEBUG 0
+#define REC_DEBUG 1
 #if (REC_DEBUG == 1)
 #include <stdio.h>
 #endif
@@ -170,6 +170,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
    unsigned long lastHigh[PWM_IN_NUM];
    unsigned long lastLow[PWM_IN_NUM];
    unsigned int dutyCycle[PWM_IN_NUM];
+   int modulus;
 
    for (unsigned int i = 0; i < PWM_IN_NUM; i++)
    {
@@ -196,13 +197,23 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
    else
    {
       for (unsigned int i = 0; i < PWM_IN_NUM; i++)
-      {
+      {        
          // calculate duty cycle based on last high count vs total number of ticks in period
          // note that this shifts value by a factor of 10 to normalize between 50% and 100%
          dutyCycle[i] = (lastHigh[i] * 1000) / (lastHigh[i] + lastLow [i]);
          
          // normalize duty cycle around 50%
          dutyCycle[i] = (dutyCycle[i] - BASE_VAL_DUTY) * 2;
+         
+         modulus = dutyCycle[i] % 5;
+         if (modulus > 2)
+         {
+            dutyCycle[i] += (5 - modulus);
+         }
+         else
+         {
+            dutyCycle[i] -= modulus;
+         }
 
 #if(REC_DEBUG == 1)
          PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);

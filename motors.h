@@ -4,6 +4,7 @@
 #include <Servo.h>
 
 #define CALIBRATE    1 /* turn on to calibrate motors */
+#define MOTOR_DELAY 250
 
 const int MOTORS_NUM    = 4;  // number of Servo motors
 

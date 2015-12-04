@@ -18,7 +18,6 @@ ServoMotor::ServoMotor(const unsigned int pin, const int error,
 void ServoMotor::SetSpeed(const int pwm)
 {
    mServo.writeMicroseconds(pwm);
-   delay(25);
 }
 
 void ServoMotor::SetupMotor()
@@ -89,6 +88,7 @@ void MotorSet::motorDebug()
    {
       motor.SetSpeed(speed);
    }
+   delay(MOTOR_DELAY);
 
    Serial.println(speed);
 }
@@ -102,4 +102,5 @@ void MotorSet::controlMotors(const int yaw, const int pitch, const int roll, con
                      (yaw      * motor.GetYawMap()) + 
                      (throttle * motor.GetThrottleMap()));
    }
+   delay(MOTOR_DELAY);
 }
