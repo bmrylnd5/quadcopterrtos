@@ -3,6 +3,8 @@
 #include "motors.h"
 #include "pinmap.h"    
 
+const int CTRL_SCALE = 1; // Scaling factor used to mix throttle with commands; use 5
+  
 ServoMotor::ServoMotor(const unsigned int pin, const int error, 
                        const int pitch, const int roll, const int yaw, const int throttle) :
    mPin(pin),
@@ -101,11 +103,14 @@ void MotorSet::motorDebug()
 
 void MotorSet::controlMotors(const int yaw, const int pitch, const int roll, const int throttle)
 {
+   int controlOffset;
+   
    for (ServoMotor &motor : mMotors)
    {
-      motor.SetSpeed((pitch    * motor.GetPitchMap()) + 
-                     (roll     * motor.GetRollMap()) + 
-                     (yaw      * motor.GetYawMap()) + 
-                     (throttle * motor.GetThrottleMap()));
+      controlOffset = (pitch    * motor.GetPitchMap()) + 
+                      (roll     * motor.GetRollMap()) + 
+                      (yaw      * motor.GetYawMap()); 
+      controlOffset = controlOffset / CTRL_SCALE;
+      motor.SetSpeed((throttle * motor.GetThrottleMap()) + controlOffset);
    }
 }
