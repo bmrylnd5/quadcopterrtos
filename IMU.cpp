@@ -148,6 +148,6 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
    else
    {
       Serial.print(F("unhandled mpu int status 0x"));
-      Serial.print(mpuIntStatus, HEX);
+      Serial.println(mpuIntStatus, HEX);
    }
 }

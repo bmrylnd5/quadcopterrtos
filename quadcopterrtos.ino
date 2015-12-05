@@ -7,7 +7,7 @@ extern "C"
 #include "IMU.h"
 #include "Receiver.h"
 
-#define PRINT_DEBUG 0
+#define PRINT_DEBUG 1
 #define MOTOR_DEBUG 0
 #define MOTOR_DELAY 100
 
@@ -133,6 +133,6 @@ void printYPRT(const int port, const char * const str, const float yaw, const fl
 void loop()
 {
    quadThread();
-   imuThread(); 
+   imuThread();
    delay(MOTOR_DELAY);
 }
