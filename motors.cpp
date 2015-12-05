@@ -18,7 +18,6 @@ ServoMotor::ServoMotor(const unsigned int pin, const int error,
 void ServoMotor::SetSpeed(const int pwm)
 {
    mServo.writeMicroseconds(pwm);
-   delay(25);
 }
 
 void ServoMotor::SetupMotor()

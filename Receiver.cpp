@@ -22,8 +22,10 @@ typedef struct
 } pwmTickCount;
 
 const unsigned int PWM_IN_NUM    = 5;     // Number of input PWM signals.
-const unsigned int STALE_THRESH  = 60000; // Threshold in us for last reception
+const unsigned int STALE_THRESH  = 65000UL; // Threshold in us for last reception
 const int BASE_VAL_DUTY          = 50;    // Center command value (duty cycle)
+const int REC_STEPA              = 5;     // Step value used to bin commands
+const int REC_STEPB              = 2;     // Used to bin with REC_STEPA
 
 // Protects critical section
 static volatile bool mIsrDataInUse[PWM_IN_NUM];
@@ -170,6 +172,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
    unsigned long lastHigh[PWM_IN_NUM];
    unsigned long lastLow[PWM_IN_NUM];
    unsigned int dutyCycle[PWM_IN_NUM];
+   int modulus;
 
    for (unsigned int i = 0; i < PWM_IN_NUM; i++)
    {
@@ -200,9 +203,20 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
          // calculate duty cycle based on last high count vs total number of ticks in period
          // note that this shifts value by a factor of 10 to normalize between 50% and 100%
          dutyCycle[i] = (lastHigh[i] * 1000) / (lastHigh[i] + lastLow [i]);
-         
+
          // normalize duty cycle around 50%
          dutyCycle[i] = (dutyCycle[i] - BASE_VAL_DUTY) * 2;
+
+         // use incremental stepping for receiver commands to reduce jitter
+         modulus = dutyCycle[i] % REC_STEPA;
+         if (modulus > REC_STEPB)
+         {
+            dutyCycle[i] += (REC_STEPA - modulus);
+         }
+         else
+         {
+            dutyCycle[i] -= modulus;
+         }
 
 #if(REC_DEBUG == 1)
          PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);

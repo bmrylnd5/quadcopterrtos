@@ -7,8 +7,9 @@ extern "C"
 #include "IMU.h"
 #include "Receiver.h"
 
-#define PRINT_DEBUG 1
+#define PRINT_DEBUG 0
 #define MOTOR_DEBUG 0
+#define MOTOR_DELAY 100
 
 const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
 
@@ -65,7 +66,7 @@ void quadThread(void)
       printYPRT(1, "YPRT PID CMD: ", newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
 
       /* output to motors - in microseconds */
-      motors.controlMotors(newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
+      motors.controlMotors(0, 0, 0, throttleCmd);
    }
    else
    {
@@ -132,5 +133,6 @@ void printYPRT(const int port, const char * const str, const float yaw, const fl
 void loop()
 {
    quadThread();
-   imuThread();  
+   imuThread(); 
+   delay(MOTOR_DELAY);
 }

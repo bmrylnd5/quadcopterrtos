@@ -8,8 +8,8 @@
 const int MOTORS_NUM    = 4;  // number of Servo motors
 
 // min/max throttles for each motor
-const int MAX_THROTTLE  = 1900;
-const int MIN_THROTTLE  = 1200;
+const int MAX_THROTTLE     = 1900;
+const int MIN_THROTTLE     = 1200;
 
 // unused
 #if 0
