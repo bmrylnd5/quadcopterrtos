@@ -7,9 +7,8 @@ extern "C"
 #include "IMU.h"
 #include "Receiver.h"
 
-#define PRINT_DEBUG 1
+#define PRINT_DEBUG 0
 #define MOTOR_DEBUG 0
-#define MOTOR_DELAY 100
 
 const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
 
@@ -72,10 +71,17 @@ void quadThread(void)
    {
       /* turn off motors */
       Serial.println(F("Disarming motors"));
-      motors.controlMotors(BASE_VAL_DEG, BASE_VAL_DEG, BASE_VAL_DEG, MIN_THROTTLE);
+      motors.controlMotors(BASE_VAL_DEG, BASE_VAL_DEG, BASE_VAL_DEG, MIN_THROTTLE_DEG);
    }
 #else
-   motorDebug();
+   (void)arm;
+   (void)yawCmd;
+   (void)pitchCmd;
+   (void)rollCmd;
+   (void)newYawCmd;
+   (void)newPitchCmd;
+   (void)newRollCmd;
+   motors.motorDebug();
 #endif
 }
 
@@ -99,7 +105,7 @@ void setup()
 void printYPRT(const int port, const char * const str, const float yaw, const float pitch, const float roll, const int throttle)
 {
 #if (PRINT_DEBUG == 1)
-   /*if(port == 2)
+   if(port == 2)
    {
       Serial2.print(yaw);
       Serial2.print(",");
@@ -109,7 +115,7 @@ void printYPRT(const int port, const char * const str, const float yaw, const fl
       Serial2.print(",   ");
       Serial2.println(throttle);
    }
-   else*/
+   else
    {
       Serial.print(str);
       Serial.print(yaw);

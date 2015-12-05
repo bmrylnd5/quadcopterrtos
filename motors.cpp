@@ -17,29 +17,31 @@ ServoMotor::ServoMotor(const unsigned int pin, const int error,
 
 void ServoMotor::SetSpeed(const int pwm)
 {
-   mServo.write(map(pwm, MIN_THROTTLE, MAX_THROTTLE, 0, 179));
+   mServo.write(pwm);
 }
 
 void ServoMotor::SetupMotor()
 {
    mServo.attach(this->mPin);
-   mServo.setMinimumPulse(MIN_THROTTLE);
-   mServo.setMaximumPulse(MAX_THROTTLE);
+   mServo.setMinimumPulse(MIN_THROTTLE_US);
+   mServo.setMaximumPulse(MAX_THROTTLE_US);
 }
 
 MotorSet::MotorSet() :
    mMotors(
    {
-      ServoMotor(MOTOR_1_PIN, 0,   1, -1,  1, 1),
-      ServoMotor(MOTOR_2_PIN, 0,  -1,  1,  1, 1),
-      ServoMotor(MOTOR_3_PIN, 0,   1,  1, -1, 1),
-      ServoMotor(MOTOR_4_PIN, 0,  -1, -1, -1, 1)
+      // corresponds to motor inputs 1-4 in order
+      // front right CCW
+      // back left   CCW
+      // front left  CW 
+      // back right  CW
+      //                    error, pitch, roll, yaw, throttle
+      ServoMotor(MOTOR_1_PIN, 0,   1,  1,   1, 1),
+      ServoMotor(MOTOR_2_PIN, 0,  -1, -1,   1, 1),
+      ServoMotor(MOTOR_3_PIN, 0,   1, -1,  -1, 1),
+      ServoMotor(MOTOR_4_PIN, 0,  -1,  1,  -1, 1)
    })
 {
-/*{{ 1, -1,  1, 1},  // pitch, roll, yaw, throttle
-   {-1,  1,  1, 1},
-   { 1,  1, -1, 1},
-   {-1, -1, -1, 1}}; */
 }
 
 #if (CALIBRATE == 1)
@@ -49,7 +51,7 @@ void MotorSet::calibrateMotors()
    // arm the speed controller, modify as necessary for your ESC  
    for (ServoMotor &motor : mMotors)
    {
-      motor.SetSpeed(MAX_THROTTLE);
+      motor.SetSpeed(MAX_THROTTLE_DEG);
    }
 
    Serial.println("Enable power now...");
@@ -58,7 +60,7 @@ void MotorSet::calibrateMotors()
    // arm the speed controller, modify as necessary for your ESC  
    for (ServoMotor &motor : mMotors)
    {
-      motor.SetSpeed(MIN_THROTTLE);
+      motor.SetSpeed(MIN_THROTTLE_DEG);
    }
 
    delay(7000);
@@ -83,7 +85,10 @@ void MotorSet::setupMotors()
 void MotorSet::motorDebug()
 {
    Serial.print("Enter pwm value: ");
-   while(!Serial.available());
+   while(!Serial.available())
+   {
+      SoftwareServo::refresh();
+   }
    int speed = Serial.parseInt();
 
    for (ServoMotor &motor : mMotors)
