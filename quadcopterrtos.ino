@@ -66,7 +66,7 @@ void quadThread(void)
       printYPRT(1, "YPRT PID CMD: ", newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
 
       /* output to motors - in microseconds */
-      motors.controlMotors(0, 0, 0, throttleCmd);
+      motors.controlMotors(yawCmd, pitchCmd, rollCmd, throttleCmd);
    }
    else
    {
@@ -134,5 +134,5 @@ void loop()
 {
    quadThread();
    imuThread();
-   delay(MOTOR_DELAY);
+   SoftwareServo::refresh();
 }

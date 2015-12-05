@@ -100,10 +100,9 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
     }
 
    // wait for MPU interrupt or extra packet(s) available
-   if (!mpuInterrupt && (mFifoCount < mPacketSize)) 
+   while (!mpuInterrupt && (mFifoCount < mPacketSize)) 
    {
       // Do nothing
-      return;
    }
 
    // reset interrupt flag and get INT_STATUS byte

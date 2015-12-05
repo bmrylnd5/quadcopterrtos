@@ -17,12 +17,14 @@ ServoMotor::ServoMotor(const unsigned int pin, const int error,
 
 void ServoMotor::SetSpeed(const int pwm)
 {
-   mServo.writeMicroseconds(pwm);
+   mServo.write(map(pwm, MIN_THROTTLE, MAX_THROTTLE, 0, 179));
 }
 
 void ServoMotor::SetupMotor()
 {
-   mServo.attach(this->mPin, MIN_THROTTLE, MAX_THROTTLE);
+   mServo.attach(this->mPin);
+   mServo.setMinimumPulse(MIN_THROTTLE);
+   mServo.setMaximumPulse(MAX_THROTTLE);
 }
 
 MotorSet::MotorSet() :

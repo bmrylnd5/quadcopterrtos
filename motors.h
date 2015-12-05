@@ -1,15 +1,15 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-#include <Servo.h>
+#include <SoftwareServo.h>
 
-#define CALIBRATE    1 /* turn on to calibrate motors */
+#define CALIBRATE    0 /* turn on to calibrate motors */
 
 const int MOTORS_NUM    = 4;  // number of Servo motors
 
 // min/max throttles for each motor
-const int MAX_THROTTLE     = 1900;
-const int MIN_THROTTLE     = 1200;
+const int MAX_THROTTLE  = 1900;
+const int MIN_THROTTLE  = 1200;
 
 // unused
 #if 0
@@ -44,7 +44,7 @@ class ServoMotor
  private:   
    unsigned int mPin;      // input pin associated with motor
    int mError;             // Correctional value to achieve neutral base command
-   Servo mServo;           // Servo control class
+   SoftwareServo mServo;   // Servo control class
    
    // motor mappings
    int mPitch;
