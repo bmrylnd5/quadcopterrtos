@@ -1,15 +1,17 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-#include <Servo.h>
+#include <SoftwareServo.h>
 
-#define CALIBRATE    1 /* turn on to calibrate motors */
+#define CALIBRATE         0   // turn on to calibrate motors at startup
 
 const int MOTORS_NUM    = 4;  // number of Servo motors
 
 // min/max throttles for each motor
-const int MAX_THROTTLE  = 1900;
-const int MIN_THROTTLE  = 1200;
+const int MAX_THROTTLE_US  = 1900;
+const int MIN_THROTTLE_US  = 1200;
+const int MIN_THROTTLE_DEG = 0;
+const int MAX_THROTTLE_DEG = 179;
 
 // unused
 #if 0
@@ -30,7 +32,7 @@ class ServoMotor
               const int pitch, const int roll, const int yaw, const int throttle);
    
    void SetupMotor();               // Attach and bound Servo motor
-   void SetSpeed(const int pwm);    // Set the speed of a motor 
+   void SetSpeed(const int pwm);    // Set the speed of a motor in degrees (0-180)
    
    inline unsigned int GetPin()  const { return mPin; }
    inline int GetError()         const { return mError; }
@@ -44,7 +46,7 @@ class ServoMotor
  private:   
    unsigned int mPin;      // input pin associated with motor
    int mError;             // Correctional value to achieve neutral base command
-   Servo mServo;           // Servo control class
+   SoftwareServo mServo;   // Servo control class
    
    // motor mappings
    int mPitch;
@@ -69,11 +71,6 @@ class MotorSet
  private:
    void calibrateMotors(); // Calibrate all the motors 
    
-   // corresponds to motor inputs 1-4 in order
-   // front right CCW
-   // back left   CCW
-   // front left  CW 
-   // back right  CW
    ServoMotor mMotors[MOTORS_NUM];
 };
 

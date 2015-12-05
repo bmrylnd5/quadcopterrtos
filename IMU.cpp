@@ -143,11 +143,6 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
 
       yaw = ypr[0] * 180/M_PI;
       pitch = ypr[2] * 180/M_PI;
-      roll = ypr[1] * 180/M_PI;
-   }
-   else
-   {
-      Serial.print(F("unhandled mpu int status 0x"));
-      Serial.print(mpuIntStatus, HEX);
+      roll = ypr[1] * (-180/M_PI); // invert roll channel
    }
 }

@@ -22,8 +22,15 @@ typedef struct
 } pwmTickCount;
 
 const unsigned int PWM_IN_NUM    = 5;     // Number of input PWM signals.
-const unsigned int STALE_THRESH  = 60000; // Threshold in us for last reception
-const int BASE_VAL_DUTY          = 50;    // Center command value (duty cycle)
+const unsigned int STALE_THRESH  = 65000UL; // Threshold in us for last reception
+
+// command value limits (duty cycle)
+const int DUTY_LOWER_VAL         = 0;
+const int DUTY_BASE_VAL          = 50;
+const int DUTY_UPPER_VAL         = 100;
+
+const int REC_STEPA              = 5;     // Step value used to bin commands
+const int REC_STEPB              = 2;     // Used to bin with REC_STEPA
 
 // Protects critical section
 static volatile bool mIsrDataInUse[PWM_IN_NUM];
@@ -170,6 +177,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
    unsigned long lastHigh[PWM_IN_NUM];
    unsigned long lastLow[PWM_IN_NUM];
    unsigned int dutyCycle[PWM_IN_NUM];
+   int modulus;
 
    for (unsigned int i = 0; i < PWM_IN_NUM; i++)
    {
@@ -188,7 +196,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       yaw      = BASE_VAL_DEG;
       pitch    = BASE_VAL_DEG;
       roll     = BASE_VAL_DEG;
-      throttle = MIN_THROTTLE;
+      throttle = MIN_THROTTLE_DEG;
       arm      = 0;
       
       Serial.println(F("Receiver values stale, using default"));
@@ -200,9 +208,20 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
          // calculate duty cycle based on last high count vs total number of ticks in period
          // note that this shifts value by a factor of 10 to normalize between 50% and 100%
          dutyCycle[i] = (lastHigh[i] * 1000) / (lastHigh[i] + lastLow [i]);
-         
+
          // normalize duty cycle around 50%
-         dutyCycle[i] = (dutyCycle[i] - BASE_VAL_DUTY) * 2;
+         dutyCycle[i] = (dutyCycle[i] - DUTY_BASE_VAL) * 2;
+
+         // use incremental stepping for receiver commands to reduce jitter
+         modulus = dutyCycle[i] % REC_STEPA;
+         if (modulus > REC_STEPB)
+         {
+            dutyCycle[i] += (REC_STEPA - modulus);
+         }
+         else
+         {
+            dutyCycle[i] -= modulus;
+         }
 
 #if(REC_DEBUG == 1)
          PrintDebug(i + 1, dutyCycle[i], lastLow[i], lastHigh[i]);
@@ -210,17 +229,17 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       }
       
       // account for error then convert to degrees (-45 to 45)
-      yaw      = map(dutyCycle[PinIndex(mYaw.GetPin())]   + mYaw.GetError(),   0, 100, YAW_UPPER_LIMIT, YAW_LOWER_LIMIT);
-      pitch    = map(dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError(), 0, 100, PITCH_UPPER_LIMIT, PITCH_LOWER_LIMIT);
-      roll     = map(dutyCycle[PinIndex(mRoll.GetPin())]  + mRoll.GetError(),  0, 100, ROLL_UPPER_LIMIT, ROLL_LOWER_LIMIT);
+      yaw      = map(dutyCycle[PinIndex(mYaw.GetPin())]   + mYaw.GetError(),   DUTY_LOWER_VAL, DUTY_UPPER_VAL, YAW_UPPER_LIMIT,   YAW_LOWER_LIMIT);
+      pitch    = map(dutyCycle[PinIndex(mPitch.GetPin())] + mPitch.GetError(), DUTY_LOWER_VAL, DUTY_UPPER_VAL, PITCH_UPPER_LIMIT, PITCH_LOWER_LIMIT);
+      roll     = map(dutyCycle[PinIndex(mRoll.GetPin())]  + mRoll.GetError(),  DUTY_LOWER_VAL, DUTY_UPPER_VAL, ROLL_UPPER_LIMIT,  ROLL_LOWER_LIMIT);
 
       // do not convert to degrees
-      throttle = map(dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError(), 0, 100, MIN_THROTTLE, MAX_THROTTLE);
+      throttle = map(dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError(), DUTY_LOWER_VAL, DUTY_UPPER_VAL, MIN_THROTTLE_DEG, MAX_THROTTLE_DEG);
       arm      = dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError();
 
       yaw      = constrain(yaw, YAW_LOWER_LIMIT, YAW_UPPER_LIMIT);
       pitch    = constrain(pitch, PITCH_LOWER_LIMIT, PITCH_UPPER_LIMIT);
       roll     = constrain(roll, ROLL_LOWER_LIMIT, ROLL_UPPER_LIMIT);
-      throttle = constrain(throttle, MIN_THROTTLE, MAX_THROTTLE);
+      throttle = constrain(throttle, MIN_THROTTLE_DEG, MAX_THROTTLE_DEG);
    }
 }

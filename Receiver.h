@@ -30,7 +30,7 @@ class Receiver
    /*
     * Main Receiver loop reading yaw, pitch, roll, throttle, and arm commands.
     * YPR values range from -45 to 45
-    * Throttle values range from MIN_THROTTLE to MAX_THROTTLE
+    * Throttle values range from MIN_THROTTLE_DEG to MAX_THROTTLE_DEG
     * ARM values range from 0 to 100
     */
    void ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int &arm);
