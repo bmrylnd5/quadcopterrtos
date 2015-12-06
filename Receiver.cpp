@@ -21,8 +21,8 @@ typedef struct
    unsigned long ticksLow;    // Number of timer ticks while LOW.
 } pwmTickCount;
 
-const unsigned int PWM_IN_NUM    = 5;     // Number of input PWM signals.
-const unsigned int STALE_THRESH  = 65000UL; // Threshold in us for last reception
+const unsigned int  PWM_IN_NUM    = 5;     // Number of input PWM signals.
+const unsigned long STALE_THRESH  = 500000UL; // Threshold in us for last reception
 
 // command value limits (duty cycle)
 const int DUTY_LOWER_VAL         = 0;
@@ -196,7 +196,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       yaw      = BASE_VAL_DEG;
       pitch    = BASE_VAL_DEG;
       roll     = BASE_VAL_DEG;
-      throttle = MIN_THROTTLE_DEG;
+      throttle = MIN_THROTTLE_US;
       arm      = 0;
       
       Serial.println(F("Receiver values stale, using default"));
@@ -234,12 +234,12 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
       roll     = map(dutyCycle[PinIndex(mRoll.GetPin())]  + mRoll.GetError(),  DUTY_LOWER_VAL, DUTY_UPPER_VAL, ROLL_UPPER_LIMIT,  ROLL_LOWER_LIMIT);
 
       // do not convert to degrees
-      throttle = map(dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError(), DUTY_LOWER_VAL, DUTY_UPPER_VAL, MIN_THROTTLE_DEG, MAX_THROTTLE_DEG);
+      throttle = map(dutyCycle[PinIndex(mThrottle.GetPin())] + mThrottle.GetError(), DUTY_LOWER_VAL, DUTY_UPPER_VAL, MIN_THROTTLE_US, MAX_THROTTLE_US);
       arm      = dutyCycle[PinIndex(mArm.GetPin())] + mArm.GetError();
 
       yaw      = constrain(yaw, YAW_LOWER_LIMIT, YAW_UPPER_LIMIT);
       pitch    = constrain(pitch, PITCH_LOWER_LIMIT, PITCH_UPPER_LIMIT);
       roll     = constrain(roll, ROLL_LOWER_LIMIT, ROLL_UPPER_LIMIT);
-      throttle = constrain(throttle, MIN_THROTTLE_DEG, MAX_THROTTLE_DEG);
+      throttle = constrain(throttle, MIN_THROTTLE_US, MAX_THROTTLE_US);
    }
 }

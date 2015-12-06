@@ -3,6 +3,18 @@
 
 #include "pid.h"
 
+static float YAW_KP   = 0.0;
+static float YAW_KI   = 0.0;
+static float YAW_KD   = 0.0;
+
+static float PITCH_KP = 0.5;
+static float PITCH_KI = 2.5;
+static float PITCH_KD = 0.0;
+
+static float ROLL_KP  = 0.0;
+static float ROLL_KI  = 0.0;
+static float ROLL_KD  = 0.0;
+
 float pidPitch(float cmd, 
                float actual)
 {
@@ -148,4 +160,25 @@ float pidYaw(float cmd,
 
   errorDerivative = error;
   return output;
+}
+
+void setPidPitch(float p, float i, float d)
+{
+  PITCH_KP = p;
+  PITCH_KI = i;
+  PITCH_KD = d;
+}
+
+void setPidRoll(float p, float i, float d)
+{
+  ROLL_KP = p;
+  ROLL_KI = i;
+  ROLL_KD = d;
+}
+
+void setPidYaw(float p, float i, float d)
+{
+  YAW_KP = p;
+  YAW_KI = i;
+  YAW_KD = d;
 }

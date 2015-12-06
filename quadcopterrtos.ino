@@ -52,7 +52,7 @@ void quadThread(void)
    /* read receiver */
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
    
-   printYPRT(1, "YPRT Rec CMD: ", yawCmd, pitchCmd, rollCmd, throttleCmd);
+   //printYPRT(1, "YPRT Rec CMD: ", yawCmd, pitchCmd, rollCmd, throttleCmd);
 
    /* quadcopter must be armed to fly */
    if (arm > ARM_PERCENT)
@@ -63,16 +63,18 @@ void quadThread(void)
       newRollCmd  = pidRoll(rollCmd,   rollDeg);
 
       printYPRT(1, "YPRT PID CMD: ", newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
-
-      /* output to motors - in microseconds */
-      motors.controlMotors(yawCmd, pitchCmd, rollCmd, throttleCmd);
    }
    else
    {
       /* turn off motors */
-      Serial.println(F("Disarming motors"));
-      motors.controlMotors(BASE_VAL_DEG, BASE_VAL_DEG, BASE_VAL_DEG, MIN_THROTTLE_DEG);
+      newYawCmd    = BASE_VAL_DEG;
+      newPitchCmd  = BASE_VAL_DEG;
+      newRollCmd   = BASE_VAL_DEG;
+      throttleCmd  = MIN_THROTTLE_US;
    }
+
+   /* output to motors - in microseconds */
+   motors.controlMotors(0, newPitchCmd, 0, throttleCmd- 100);
 #else
    (void)arm;
    (void)yawCmd;
@@ -89,6 +91,7 @@ void quadThread(void)
 void setup()
 {
    Serial.begin(115200);
+   Serial.flush();
    //Serial2.begin(115200);
 
    // Initialize motors
@@ -138,7 +141,7 @@ void printYPRT(const int port, const char * const str, const float yaw, const fl
 
 void loop()
 {
-   quadThread();
    imuThread();
-   SoftwareServo::refresh();
+   quadThread();
+   delay(75);
 }

@@ -6,21 +6,12 @@
 
 /* UNITS ARE IN RADIANS */
 /* gains - TUNE ME */
-#define PITCH_KP           0.1
-#define PITCH_KI           0
-#define PITCH_KD           0
 #define PITCH_UPPER_LIMIT  45
 #define PITCH_LOWER_LIMIT -45
 
-#define ROLL_KP            0.1
-#define ROLL_KI            0
-#define ROLL_KD            0
 #define ROLL_UPPER_LIMIT   45
 #define ROLL_LOWER_LIMIT  -45
 
-#define YAW_KP             0.1
-#define YAW_KI             0
-#define YAW_KD             0
 #define YAW_UPPER_LIMIT    45
 #define YAW_LOWER_LIMIT   -45
 
@@ -44,5 +35,9 @@ float pidRoll(float cmd,
  */
 float pidYaw(float cmd, 
              float actual);
+
+void setPidPitch(float p, float i, float d);
+void setPidRoll(float p, float i, float d);
+void setPidYaw(float p, float i, float d);
 
 #endif /* PID_H */

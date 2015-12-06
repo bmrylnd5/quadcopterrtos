@@ -70,6 +70,7 @@ void IMU::SetupIMU()
       Serial.println(F("DMP ready! Waiting for first interrupt..."));
       mDmpReady = true;
 
+      mpu.getIntStatus();
       // get expected DMP packet size for later comparison
       mPacketSize = mpu.dmpGetFIFOPacketSize();
    } 
@@ -100,10 +101,9 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
     }
 
    // wait for MPU interrupt or extra packet(s) available
-   if (!mpuInterrupt && (mFifoCount < mPacketSize)) 
+   while (!mpuInterrupt && (mFifoCount < mPacketSize)) 
    {
       // Do nothing
-      return;
    }
 
    // reset interrupt flag and get INT_STATUS byte
@@ -114,11 +114,11 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
    mFifoCount = mpu.getFIFOCount();
 
    // check for overflow (this should never happen unless our code is too inefficient)
-   if ((mpuIntStatus & 0x10) || (mFifoCount == 1024)) 
+   if ((mpuIntStatus & 0x10) || (mFifoCount >= 1024)) 
    {
       // reset so we can continue cleanly
       mpu.resetFIFO();
-      Serial.println(F("FIFO overflow!"));
+      //Serial.println(F("FIFO overflow!"));
    } 
    // otherwise, check for DMP data ready interrupt (this should happen frequently)
    else if (mpuIntStatus & 0x02) 

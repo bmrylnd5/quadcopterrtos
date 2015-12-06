@@ -19,14 +19,12 @@ ServoMotor::ServoMotor(const unsigned int pin, const int error,
 
 void ServoMotor::SetSpeed(const int pwm)
 {
-   mServo.write(pwm);
+   mServo.writeMicroseconds(pwm);
 }
 
 void ServoMotor::SetupMotor()
 {
-   mServo.attach(this->mPin);
-   mServo.setMinimumPulse(MIN_THROTTLE_US);
-   mServo.setMaximumPulse(MAX_THROTTLE_US);
+   mServo.attach(this->mPin, MIN_THROTTLE_US, MAX_THROTTLE_US);
 }
 
 MotorSet::MotorSet() :
@@ -38,10 +36,10 @@ MotorSet::MotorSet() :
       // front left  CW 
       // back right  CW
       //                    error, pitch, roll, yaw, throttle
-      ServoMotor(MOTOR_1_PIN, 0,   1,  1,   1, 1),
-      ServoMotor(MOTOR_2_PIN, 0,  -1, -1,   1, 1),
-      ServoMotor(MOTOR_3_PIN, 0,   1, -1,  -1, 1),
-      ServoMotor(MOTOR_4_PIN, 0,  -1,  1,  -1, 1)
+      ServoMotor(MOTOR_1_PIN, 0,     1,    1,    1,     1),
+      ServoMotor(MOTOR_2_PIN, 0,    -1,   -1,    1,     1),
+      ServoMotor(MOTOR_3_PIN, 0,     1,   -1,   -1,     1),
+      ServoMotor(MOTOR_4_PIN, 0,    -1,    1,   -1,     1)
    })
 {
 }
@@ -53,7 +51,7 @@ void MotorSet::calibrateMotors()
    // arm the speed controller, modify as necessary for your ESC  
    for (ServoMotor &motor : mMotors)
    {
-      motor.SetSpeed(MAX_THROTTLE_DEG);
+      motor.SetSpeed(MAX_THROTTLE_US);
    }
 
    Serial.println("Enable power now...");
@@ -62,10 +60,10 @@ void MotorSet::calibrateMotors()
    // arm the speed controller, modify as necessary for your ESC  
    for (ServoMotor &motor : mMotors)
    {
-      motor.SetSpeed(MIN_THROTTLE_DEG);
+      motor.SetSpeed(MIN_THROTTLE_US);
    }
 
-   delay(7000);
+   delay(5000);
 
    Serial.println("Calibration finished...");
 }
@@ -79,18 +77,25 @@ void MotorSet::setupMotors()
       motor.SetupMotor();
    }
 
+   delay(100);
+
 #if (CALIBRATE == 1)
    calibrateMotors();
 #endif /* CALIBRATE */
+   
+   for (ServoMotor &motor : mMotors)
+   {
+      motor.SetSpeed(MIN_THROTTLE_US);
+   }
+
+   delay(5000);
 }
 
 void MotorSet::motorDebug()
 {
    Serial.print("Enter pwm value: ");
-   while(!Serial.available())
-   {
-      SoftwareServo::refresh();
-   }
+   while(!Serial.available());
+   
    int speed = Serial.parseInt();
 
    for (ServoMotor &motor : mMotors)
@@ -103,14 +108,19 @@ void MotorSet::motorDebug()
 
 void MotorSet::controlMotors(const int yaw, const int pitch, const int roll, const int throttle)
 {
-   int controlOffset;
+   /*int controlOffset;
    
    for (ServoMotor &motor : mMotors)
    {
       controlOffset = (pitch    * motor.GetPitchMap()) + 
                       (roll     * motor.GetRollMap()) + 
                       (yaw      * motor.GetYawMap()); 
-      controlOffset = controlOffset / CTRL_SCALE;
+      controlOffset = controlOffset * CTRL_SCALE;
       motor.SetSpeed((throttle * motor.GetThrottleMap()) + controlOffset);
-   }
+   }*/
+
+   mMotors[1].SetSpeed(throttle - roll - pitch - yaw);
+   mMotors[2].SetSpeed(throttle - roll + pitch + yaw);
+   mMotors[0].SetSpeed(throttle + roll - pitch + yaw);
+   mMotors[3].SetSpeed(throttle + roll + pitch - yaw);
 }

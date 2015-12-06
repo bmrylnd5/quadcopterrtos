@@ -1,17 +1,15 @@
 #ifndef MOTORS_H
 #define MOTORS_H
 
-#include <SoftwareServo.h>
+#include <Servo.h>
 
-#define CALIBRATE         0   // turn on to calibrate motors at startup
+#define CALIBRATE         1   // turn on to calibrate motors at startup
 
 const int MOTORS_NUM    = 4;  // number of Servo motors
 
 // min/max throttles for each motor
 const int MAX_THROTTLE_US  = 1900;
 const int MIN_THROTTLE_US  = 1200;
-const int MIN_THROTTLE_DEG = 0;
-const int MAX_THROTTLE_DEG = 179;
 
 // unused
 #if 0
@@ -44,9 +42,9 @@ class ServoMotor
    inline int GetThrottleMap()   const { return mThrottle; }
    
  private:   
-   unsigned int mPin;      // input pin associated with motor
-   int mError;             // Correctional value to achieve neutral base command
-   SoftwareServo mServo;   // Servo control class
+   unsigned int mPin; // input pin associated with motor
+   int mError;        // Correctional value to achieve neutral base command
+   Servo mServo;      // Servo control class
    
    // motor mappings
    int mPitch;
