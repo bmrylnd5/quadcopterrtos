@@ -74,7 +74,7 @@ void quadThread(void)
    }
 
    /* output to motors - in microseconds */
-   motors.controlMotors(0, newPitchCmd, 0, throttleCmd- 100);
+   motors.controlMotors(newYawCmd, newPitchCmd, newRollCmd, throttleCmd - 100);
 #else
    (void)arm;
    (void)yawCmd;

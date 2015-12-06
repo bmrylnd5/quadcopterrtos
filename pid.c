@@ -3,17 +3,17 @@
 
 #include "pid.h"
 
-static float YAW_KP   = 0.0;
-static float YAW_KI   = 0.0;
-static float YAW_KD   = 0.0;
+static float YAW_KP   = 1.2;
+static float YAW_KI   = 0.75;
+static float YAW_KD   = 0.4;
 
-static float PITCH_KP = 0.5;
-static float PITCH_KI = 2.5;
-static float PITCH_KD = 0.0;
+static float PITCH_KP = 1.2;
+static float PITCH_KI = 0.75;
+static float PITCH_KD = 0.4;
 
-static float ROLL_KP  = 0.0;
-static float ROLL_KI  = 0.0;
-static float ROLL_KD  = 0.0;
+static float ROLL_KP  = 1.2;
+static float ROLL_KI  = 0.75;
+static float ROLL_KD  = 0.4;
 
 float pidPitch(float cmd, 
                float actual)
