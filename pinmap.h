@@ -10,10 +10,10 @@
 // (3)  (1)     cw - ccw
 //    [] 
 // (2)  (4)     ccw - cw
-#define MOTOR_1_PIN  6 // Pin used for NE motor PWM
-#define MOTOR_2_PIN  4 // Pin used for SW motor PWM
-#define MOTOR_3_PIN  7 // Pin used for NW motor PWM
-#define MOTOR_4_PIN  5 // Pin used for SE motor PWM
+#define MOTOR_1_PIN  6 // Pin used for NE motor PWM   PH3
+#define MOTOR_2_PIN  4 // Pin used for SW motor PWM   PG5
+#define MOTOR_3_PIN  44 // Pin used for NW motor PWM   PL5
+#define MOTOR_4_PIN  5 // Pin used for SE motor PWM   PE3
 
 // Mega receiver channel inputs 
 // external interrupts (PCINT 2,3,4)

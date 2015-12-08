@@ -7,7 +7,7 @@ extern "C"
 #include "IMU.h"
 #include "Receiver.h"
 
-#define PRINT_DEBUG 0
+#define PRINT_DEBUG 1
 #define MOTOR_DEBUG 0
 
 const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
@@ -52,7 +52,7 @@ void quadThread(void)
    /* read receiver */
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
    
-   //printYPRT(1, "YPRT Rec CMD: ", yawCmd, pitchCmd, rollCmd, throttleCmd);
+   printYPRT(1, "YPRT Rec CMD: ", yawCmd, pitchCmd, rollCmd, throttleCmd);
 
    /* quadcopter must be armed to fly */
    if (arm > ARM_PERCENT)
@@ -74,7 +74,7 @@ void quadThread(void)
    }
 
    /* output to motors - in microseconds */
-   motors.controlMotors(newYawCmd, newPitchCmd, newRollCmd, throttleCmd - 100);
+   motors.controlMotors(0, 0, 0, throttleCmd - 100);
 #else
    (void)arm;
    (void)yawCmd;
@@ -143,5 +143,5 @@ void loop()
 {
    imuThread();
    quadThread();
-   delay(75);
+   delay(100);
 }
