@@ -35,7 +35,7 @@ void IMU::SetupIMU()
    // Init I2C bus
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
    Wire.begin();
-   TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
+   //TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz). Comment this line if having compilation difficulties with TWBR.
 #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
    Fastwire::setup(400, true);
 #endif
@@ -101,7 +101,7 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
     }
 
    // wait for MPU interrupt or extra packet(s) available
-   if (!mpuInterrupt && (mFifoCount >= mPacketSize)) 
+   if (!mpuInterrupt && (mFifoCount < mPacketSize)) 
    {
       // Do nothing
       return;
