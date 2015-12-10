@@ -4,7 +4,6 @@
 #include <EnableInterrupt.h>
 
 #include "motors.h"
-#include "pid.h"
 #include "pinmap.h"
 #include "Receiver.h"
 
@@ -22,7 +21,7 @@ typedef struct
 } pwmTickCount;
 
 const unsigned int  PWM_IN_NUM    = 5;     // Number of input PWM signals.
-const unsigned long STALE_THRESH  = 500000UL; // Threshold in us for last reception
+const unsigned long STALE_THRESH  = 9999999UL; // Threshold in us for last reception
 
 // command value limits (duty cycle)
 const int DUTY_LOWER_VAL         = 0;
@@ -172,7 +171,7 @@ void Receiver::PrintDebug(const unsigned int chanNum,
 }
 #endif
 
-void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int &arm)
+void Receiver::ReadReceiver(double &yaw, double &pitch, double &roll, double &throttle, double &arm)
 {
    unsigned long lastHigh[PWM_IN_NUM];
    unsigned long lastLow[PWM_IN_NUM];
@@ -190,7 +189,7 @@ void Receiver::ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int 
    
    // check command for last update time to ensure we are actively receiving data
    // Note: must use an external interrupt pin
-   if (abs(micros() - mPwmLastCount[PinIndex(REC_CHAN_1_PIN)].ticksStart) > STALE_THRESH)
+   if (abs(micros() - mPwmLastCount[PinIndex(REC_CHAN_3_PIN)].ticksStart) > STALE_THRESH)
    {
       // ERROR
       yaw      = BASE_VAL_DEG;

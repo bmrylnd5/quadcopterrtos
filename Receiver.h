@@ -33,7 +33,7 @@ class Receiver
     * Throttle values range from MIN_THROTTLE_DEG to MAX_THROTTLE_DEG
     * ARM values range from 0 to 100
     */
-   void ReadReceiver(int &yaw, int &pitch, int &roll, int &throttle, int &arm);
+   void ReadReceiver(double &yaw, double &pitch, double &roll, double &throttle, double &arm);
 
  private:
    // Main ISR for PWM calculation

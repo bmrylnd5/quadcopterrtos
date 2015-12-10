@@ -2,14 +2,22 @@
 #define MOTORS_H
 
 #include <Servo.h>
-
-#define CALIBRATE         1   // turn on to calibrate motors at startup
+#include "pinmap.h"
 
 const int MOTORS_NUM    = 4;  // number of Servo motors
 
 // min/max throttles for each motor
 const int MAX_THROTTLE_US  = 1900;
 const int MIN_THROTTLE_US  = 1200;
+
+#define PITCH_UPPER_LIMIT  45
+#define PITCH_LOWER_LIMIT -45
+
+#define ROLL_UPPER_LIMIT   45
+#define ROLL_LOWER_LIMIT  -45
+
+#define YAW_UPPER_LIMIT    45
+#define YAW_LOWER_LIMIT   -45
 
 // unused
 #if 0

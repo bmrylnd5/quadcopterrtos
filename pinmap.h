@@ -6,6 +6,8 @@
 
 #define IMU_INT_PIN  3  // Pin used for IMU interrupt (PCINT 5)
 
+#define MOTOR_CALIBRATE_PIN 39
+
 // Servo motor pin mapping
 // (3)  (1)     cw - ccw
 //    [] 

@@ -1,14 +1,13 @@
-extern "C"
-{
-#include "pid.h"
-}
 
+#include <PID_v1.h>
 #include "motors.h"
 #include "IMU.h"
 #include "Receiver.h"
 
 #define PRINT_DEBUG 1
 #define MOTOR_DEBUG 0
+
+#define LOW_MAX_CAP 2
 
 const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
 
@@ -21,21 +20,38 @@ Receiver receiver;
 // Motors set class
 MotorSet motors;
 
-/* commands */
-static int arm           = 0;
-static int throttleCmd   = 0;
-static int yawCmd        = 0;
-static int pitchCmd      = 0;
-static int rollCmd       = 0;
+static double YAW_KP   = 1.2;
+static double YAW_KI   = 0.75;
+static double YAW_KD   = 0.4;
 
-static float newYawCmd   = 0.0;
-static float newPitchCmd = 0.0;
-static float newRollCmd  = 0.0;
+static double PITCH_KP = 2;
+static double PITCH_KI = 0;
+static double PITCH_KD = 2;
+
+static double ROLL_KP  = 1.2;
+static double ROLL_KI  = 0.75;
+static double ROLL_KD  = 0.4;
+
+/* commands */
+static double arm           = 0.0;
+static double throttleCmd   = 0.0;
+static double yawCmd        = 0.0;
+static double pitchCmd      = 0.0;
+static double rollCmd       = 0.0;
+
+static double newYawCmd   = 0.0;
+static double newPitchCmd = 0.0;
+static double newRollCmd  = 0.0;
 
 /* IMU readings */
-static float yawDeg      = 0.0;
-static float pitchDeg    = 0.0;
-static float rollDeg     = 0.0;
+static double yawDeg      = 0.0;
+static double pitchDeg    = 0.0;
+static double rollDeg     = 0.0;
+
+// PID
+PID yawPID((double*)&yawDeg, &newYawCmd, (double*)&yawCmd, YAW_KP, YAW_KI, YAW_KD, DIRECT);
+PID pitchPID((double*)&pitchDeg, &newPitchCmd, (double*)&pitchCmd, PITCH_KP, PITCH_KI, PITCH_KD, DIRECT);
+PID rollPID((double*)&rollDeg, &newRollCmd, (double*)&rollCmd, ROLL_KP, ROLL_KI, ROLL_KD, DIRECT);
 
 void imuThread(void)
 {
@@ -58,9 +74,9 @@ void quadThread(void)
    if (arm > ARM_PERCENT)
    {
       /* adjust command using PID - in degrees */
-      newYawCmd   = pidYaw(yawCmd,     yawDeg);
-      newPitchCmd = pidPitch(pitchCmd, pitchDeg);
-      newRollCmd  = pidRoll(rollCmd,   rollDeg);
+      yawPID.Compute();
+      pitchPID.Compute();
+      rollPID.Compute();
 
       printYPRT(1, "YPRT PID CMD: ", newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
    }
@@ -74,7 +90,7 @@ void quadThread(void)
    }
 
    /* output to motors - in microseconds */
-   motors.controlMotors(0, 0, 0, throttleCmd - 100);
+   motors.controlMotors(0, newPitchCmd, 0, throttleCmd + 50);
 #else
    (void)arm;
    (void)yawCmd;
@@ -92,6 +108,11 @@ void setup()
 {
    Serial.begin(115200);
    Serial.flush();
+
+   pinMode(MOTOR_CALIBRATE_PIN, INPUT);
+   pinMode(13, OUTPUT);
+   digitalWrite(13, HIGH);
+
    //Serial2.begin(115200);
 
    // Initialize motors
@@ -102,24 +123,25 @@ void setup()
    
    // Set up receiver PWM interrupts
    receiver.SetupReceiver();
+
+   // turn PID on
+   yawPID.SetSampleTime(100);
+   pitchPID.SetSampleTime(100);
+   rollPID.SetSampleTime(100);
+
+   yawPID.SetMode(AUTOMATIC);
+   pitchPID.SetMode(AUTOMATIC);
+   rollPID.SetMode(AUTOMATIC);
+
+   yawPID.SetOutputLimits(YAW_LOWER_LIMIT+LOW_MAX_CAP, YAW_UPPER_LIMIT-LOW_MAX_CAP);
+   pitchPID.SetOutputLimits(PITCH_LOWER_LIMIT+LOW_MAX_CAP, PITCH_UPPER_LIMIT-LOW_MAX_CAP);
+   rollPID.SetOutputLimits(ROLL_LOWER_LIMIT+LOW_MAX_CAP, ROLL_UPPER_LIMIT-LOW_MAX_CAP);
 }
 
 // Outputs yaw, pitch, roll, and throttle via serial.
-void printYPRT(const int port, const char * const str, const float yaw, const float pitch, const float roll, const int throttle)
+void printYPRT(const int port, const char * const str, const double yaw, const double pitch, const double roll, const int throttle)
 {
 #if (PRINT_DEBUG == 1)
-   if(port == 2)
-   {
-      Serial2.print(yaw);
-      Serial2.print(",");
-      Serial2.print(pitch);
-      Serial2.print(",");
-      Serial2.print(roll);
-      Serial2.print(",   ");
-      Serial2.println(throttle);
-   }
-   else
-   {
       Serial.print(str);
       Serial.print(yaw);
       Serial.print(",");
@@ -128,7 +150,6 @@ void printYPRT(const int port, const char * const str, const float yaw, const fl
       Serial.print(roll);
       Serial.print(",   ");
       Serial.println(throttle);
-   }
 #else
    (void)str;
    (void)yaw;
@@ -143,5 +164,4 @@ void loop()
 {
    imuThread();
    quadThread();
-   delay(100);
 }

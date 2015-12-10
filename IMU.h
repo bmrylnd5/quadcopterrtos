@@ -16,7 +16,7 @@ class IMU
    /*
     * Main IMU loop reading yaw, pitch, and roll.
     */
-   void ReadIMU(float &yaw, float &pitch, float &roll);
+   void ReadIMU(double &yaw, double &pitch, double &roll);
 
  private:
     // ISR for IMU feedback

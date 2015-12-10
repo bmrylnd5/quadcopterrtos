@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
-#include "motors.h"
-#include "pinmap.h"    
+#include "motors.h"    
 
 const int CTRL_SCALE = 1; // Scaling factor used to mix throttle with commands; use 5
   
@@ -44,7 +43,6 @@ MotorSet::MotorSet() :
 {
 }
 
-#if (CALIBRATE == 1)
 void MotorSet::calibrateMotors()
 {
    Serial.println("Calibrating motors...");
@@ -67,7 +65,6 @@ void MotorSet::calibrateMotors()
 
    Serial.println("Calibration finished...");
 }
-#endif
 
 void MotorSet::setupMotors()
 {
@@ -79,9 +76,10 @@ void MotorSet::setupMotors()
 
    delay(100);
 
-#if (CALIBRATE == 1)
-   calibrateMotors();
-#endif /* CALIBRATE */
+   if (digitalRead(MOTOR_CALIBRATE_PIN) == LOW)
+   {
+      calibrateMotors();   
+   }
    
    for (ServoMotor &motor : mMotors)
    {
@@ -119,8 +117,8 @@ void MotorSet::controlMotors(const int yaw, const int pitch, const int roll, con
       motor.SetSpeed((throttle * motor.GetThrottleMap()) + controlOffset);
    }*/
 
-   mMotors[1].SetSpeed(throttle - roll - pitch - yaw);
-   mMotors[2].SetSpeed(throttle - roll + pitch + yaw);
-   mMotors[0].SetSpeed(throttle + roll - pitch + yaw);
-   mMotors[3].SetSpeed(throttle + roll + pitch - yaw);
+   mMotors[2].SetSpeed(throttle - roll + pitch - yaw); // FL
+   mMotors[1].SetSpeed((throttle - roll - pitch + yaw) + 0); // BL
+   mMotors[0].SetSpeed(throttle + roll + pitch + yaw); // FR
+   mMotors[3].SetSpeed((throttle + roll - pitch - yaw) + 0); // BR
 }

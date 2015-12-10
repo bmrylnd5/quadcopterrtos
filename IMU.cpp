@@ -64,6 +64,7 @@ void IMU::SetupIMU()
 
       // enable Arduino interrupt detection
       Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
+      //pinMode(IMU_INT_PIN, INPUT);
       enableInterrupt(IMU_INT_PIN, DmpDataReady, RISING);
 
       // set our DMP Ready flag so the main loop() function knows it's okay to use it
@@ -86,7 +87,7 @@ void IMU::SetupIMU()
    }
 }
 
-void IMU::ReadIMU(float &yaw, float &pitch, float &roll) 
+void IMU::ReadIMU(double &yaw, double &pitch, double &roll) 
 {
    uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
    uint8_t fifoBuffer[64]; // FIFO storage buffer
@@ -103,7 +104,6 @@ void IMU::ReadIMU(float &yaw, float &pitch, float &roll)
    // wait for MPU interrupt or extra packet(s) available
    if (!mpuInterrupt && (mFifoCount < mPacketSize)) 
    {
-      // Do nothing
       return;
    }
 
