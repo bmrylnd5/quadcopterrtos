@@ -43,7 +43,7 @@ THE SOFTWARE.
 // also: http://forum.arduino.cc/index.php?&topic=141571.msg1062899#msg1062899s
 
 #ifndef __arm__
-#include <avr/pgmspace.h>
+//#include <avr/pgmspace.h>
 #else
 //#define PROGMEM /* empty */
 //#define pgm_read_byte(x) (*(x))

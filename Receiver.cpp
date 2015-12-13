@@ -198,7 +198,7 @@ void Receiver::ReadReceiver(double &yaw, double &pitch, double &roll, double &th
       throttle = MIN_THROTTLE_US;
       arm      = 0;
       
-      Serial.println(F("Receiver values stale, using default"));
+      //Serial.println(F("Receiver values stale, using default"));
    }
    else
    {

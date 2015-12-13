@@ -1,4 +1,3 @@
-
 #include <PID_v1.h>
 #include "motors.h"
 #include "IMU.h"
@@ -7,7 +6,7 @@
 #define PRINT_DEBUG 1
 #define MOTOR_DEBUG 0
 
-#define LOW_MAX_CAP 2
+#define LOW_MAX_CAP 5
 
 const int ARM_PERCENT = 50; // Channel percent to arm quadcopter for flying. Error is 0.
 
@@ -20,17 +19,17 @@ Receiver receiver;
 // Motors set class
 MotorSet motors;
 
-static double YAW_KP   = 1.2;
-static double YAW_KI   = 0.75;
-static double YAW_KD   = 0.4;
+static double YAW_KP   = 1.0;
+static double YAW_KI   = 0.03;
+static double YAW_KD   = 0.05;
 
-static double PITCH_KP = 2;
-static double PITCH_KI = 0;
-static double PITCH_KD = 2;
+static double PITCH_KP = 0.5;
+static double PITCH_KI = 0.03;
+static double PITCH_KD = 0.05;
 
-static double ROLL_KP  = 1.2;
-static double ROLL_KI  = 0.75;
-static double ROLL_KD  = 0.4;
+static double ROLL_KP  = 1.0;
+static double ROLL_KI  = 0.03;
+static double ROLL_KD  = 0.05;
 
 /* commands */
 static double arm           = 0.0;
@@ -58,7 +57,7 @@ void imuThread(void)
    /* read IMU for each channel - in degrees */
    imu.ReadIMU(yawDeg, pitchDeg, rollDeg);
    
-   printYPRT(1, "YPRT IMU Val: ", yawDeg, pitchDeg, rollDeg, throttleCmd);
+   printYPRT(1, "IMU: ", yawDeg, pitchDeg, rollDeg, throttleCmd);
 }
 
 // Quadcopter state machine (main loop)
@@ -68,7 +67,7 @@ void quadThread(void)
    /* read receiver */
    receiver.ReadReceiver(yawCmd, pitchCmd, rollCmd, throttleCmd, arm);
    
-   printYPRT(1, "YPRT Rec CMD: ", yawCmd, pitchCmd, rollCmd, throttleCmd);
+   //printYPRT(1, "YPRT Rec CMD: ", yawCmd, pitchCmd, rollCmd, throttleCmd);
 
    /* quadcopter must be armed to fly */
    if (arm > ARM_PERCENT)
@@ -78,7 +77,7 @@ void quadThread(void)
       pitchPID.Compute();
       rollPID.Compute();
 
-      printYPRT(1, "YPRT PID CMD: ", newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
+      //printYPRT(1, "PID: ", newYawCmd, newPitchCmd, newRollCmd, throttleCmd);
    }
    else
    {
@@ -89,8 +88,8 @@ void quadThread(void)
       throttleCmd  = MIN_THROTTLE_US;
    }
 
-   /* output to motors - in microseconds */
-   motors.controlMotors(0, newPitchCmd, 0, throttleCmd + 50);
+   /* output to motors */
+   motors.controlMotors(0, newPitchCmd, 0, throttleCmd);
 #else
    (void)arm;
    (void)yawCmd;
@@ -144,12 +143,10 @@ void printYPRT(const int port, const char * const str, const double yaw, const d
 #if (PRINT_DEBUG == 1)
       Serial.print(str);
       Serial.print(yaw);
-      Serial.print(",");
+      Serial.print(" ");
       Serial.print(pitch);
-      Serial.print(",");
-      Serial.print(roll);
-      Serial.print(",   ");
-      Serial.println(throttle);
+      Serial.print(" ");
+      Serial.println(roll);
 #else
    (void)str;
    (void)yaw;
@@ -157,6 +154,7 @@ void printYPRT(const int port, const char * const str, const double yaw, const d
    (void)roll;
    (void)throttle;
 #endif
+   (void)throttle;
    (void) port;
 }
 

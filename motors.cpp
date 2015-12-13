@@ -18,7 +18,7 @@ ServoMotor::ServoMotor(const unsigned int pin, const int error,
 
 void ServoMotor::SetSpeed(const int pwm)
 {
-   mServo.writeMicroseconds(pwm);
+   mServo.writeMicroseconds(constrain(pwm, MIN_THROTTLE_US + 50, MAX_THROTTLE_US - 50));
 }
 
 void ServoMotor::SetupMotor()
@@ -117,8 +117,8 @@ void MotorSet::controlMotors(const int yaw, const int pitch, const int roll, con
       motor.SetSpeed((throttle * motor.GetThrottleMap()) + controlOffset);
    }*/
 
-   mMotors[2].SetSpeed(throttle - roll + pitch - yaw); // FL
+   mMotors[2].SetSpeed((throttle - roll + pitch - yaw) + 0); // FL
    mMotors[1].SetSpeed((throttle - roll - pitch + yaw) + 0); // BL
-   mMotors[0].SetSpeed(throttle + roll + pitch + yaw); // FR
-   mMotors[3].SetSpeed((throttle + roll - pitch - yaw) + 0); // BR
+   mMotors[0].SetSpeed((throttle + roll + pitch + yaw) + 0); // FR
+   mMotors[3].SetSpeed((throttle + roll - pitch - yaw) + 50); // BR
 }

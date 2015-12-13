@@ -42,6 +42,7 @@ void IMU::SetupIMU()
 
    // Init IMU
    Serial.println(F("Initializing I2C devices..."));
+   mpu.setSleepEnabled(false);
    mpu.initialize();
 
    // Verify connection
@@ -64,7 +65,7 @@ void IMU::SetupIMU()
 
       // enable Arduino interrupt detection
       Serial.println(F("Enabling interrupt detection (Arduino external interrupt 0)..."));
-      //pinMode(IMU_INT_PIN, INPUT);
+
       enableInterrupt(IMU_INT_PIN, DmpDataReady, RISING);
 
       // set our DMP Ready flag so the main loop() function knows it's okay to use it
